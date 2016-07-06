@@ -40,4 +40,4 @@ static const size_t VGA_HEIGHT = 25;
 
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
-#endif
+#endif  // _KERNEL_VGA_H
