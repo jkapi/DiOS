@@ -30,6 +30,7 @@ FREEOBJS:=\
 $(ARCH_FREEOBJS) \
 $(ARCHDIR)/gdt.o \
 $(ARCHDIR)/idt.o \
+$(ARCHDIR)/isrs.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
