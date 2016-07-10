@@ -10,7 +10,7 @@ struct gdt_entry {
   uint8_t access;
   uint8_t granularity;
   uint8_t base_high;
-} __attribute__((packed)); // prevents compiler to optimize strucy
+} __attribute__((packed)); // prevents compiler to optimize struct
 
 
 // Special pointer which includes the limit: The max bytes
@@ -18,14 +18,14 @@ struct gdt_entry {
 struct gdt_ptr {
     uint16_t  limit;
     uint32_t base;
-} __attribute__((packed)); // prevents compiler to optimize strucy
+} __attribute__((packed)); // prevents compiler to optimize struct
 
 // Our GDT, with 3 entries, and finally our special GDT pointer
 struct gdt_entry gdt[3];
 struct gdt_ptr gp;
 
-// Function arch/i386/gdt.S, loads GDT from the build GDT above
-extern void gdt_flush(uint32_t);
+// Function arch/i386/gdt.S, loads GDT from the pointeer of a gdt_ptr
+extern void gdt_flush(struct gdt_ptr* gdt_ptr_addr);
 
 // Setup a descriptor in the Global Descriptor Table
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit,
@@ -67,7 +67,7 @@ void gdt_install() {
   gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
 
   // Flush out the old GDT and install the new changes!
-  gdt_flush((uint32_t) &gp);
+  gdt_flush(&gp);
 
   printf("GDT flushed and loaded.\n");
 }

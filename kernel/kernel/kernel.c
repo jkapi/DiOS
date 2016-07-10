@@ -4,11 +4,13 @@
 #include <stdio.h>
 
 #include <kernel/gdt.h>
+#include <kernel/idt.h>
 #include <kernel/tty.h>
 
 void kernel_early(void) {
   terminal_initialize();
   gdt_install();
+  idt_install();
 }
 
 void kernel_main(void) {
