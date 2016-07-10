@@ -13,6 +13,7 @@ void kernel_early(void) {
   gdt_install();
   idt_install();
   isrs_install();
+  irq_install();
 }
 
 void kernel_main(void) {

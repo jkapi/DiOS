@@ -249,18 +249,6 @@ isr31:
     push $31
     jmp isr_common_stub
 
-# ;  8: Double Fault Exception (With Error Code!)
-# _isr8:
-#     cli
-#     push byte 8        ; Note that we DON'T push a value on the stack in this one!
-#                    ; It pushes one already! Use this type of stub for exceptions
-#                    ; that pop error codes!
-#     jmp isr_common_stub
-
-# ...                ; You should fill in from _isr9 to _isr31 here. Remember to
-#                    ; use the correct stubs to handle error codes and push dummies!
-
-# We call a C function in here.
 .extern fault_handler
 
 # Common ISR stub. saves the processor state, sets up for kernel mode segments, 

@@ -1,6 +1,8 @@
 #ifndef _KERNEL_IDT_H_
 #define _KERNEL_IDT_H_
 
+#include <stdint.h>
+
 // Sets up the IDT, should be called on early initialization
 void idt_install();
 

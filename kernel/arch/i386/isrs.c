@@ -1,6 +1,6 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <kernel/idt.h>
+#include <kernel/isrs.h>
 
 // Function prototypes for exception handlers.
 // The first 32 entries in the IDT are reserved by Intel to service exceptions
@@ -36,14 +36,6 @@ extern void isr28();
 extern void isr29();
 extern void isr30();
 extern void isr31();
-
-// Holds the registers at the time of the interrupt
-struct regs {
-    uint32_t gs, fs, es, ds;  // pushed the segs last
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;  // pushed by pusha
-    uint32_t int_no, err_code;  // manually pushed
-    uint32_t eip, cs, eflags, useresp, ss;  // pushed automatically
-};
 
 // Arrays that holds the string representation of each exception
 char *exception_messages[] = {
@@ -115,6 +107,7 @@ void isrs_install() {
     idt_set_gate(29, (unsigned) isr29, 0x08, 0x8E);
     idt_set_gate(30, (unsigned) isr30, 0x08, 0x8E);
     idt_set_gate(31, (unsigned) isr31, 0x08, 0x8E);
+    printf("Installed service ISRs.\n");
 }
 
 //  All of our Exception handling Interrupt Service Routines will
