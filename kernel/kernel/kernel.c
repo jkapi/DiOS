@@ -3,9 +3,12 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <asm.h>
 #include <kernel/gdt.h>
 #include <kernel/idt.h>
+#include <kernel/irq.h>
 #include <kernel/isrs.h>
+#include <kernel/timer.h>
 #include <kernel/tty.h>
 
 void kernel_early(void) {
@@ -14,11 +17,18 @@ void kernel_early(void) {
   idt_install();
   isrs_install();
   irq_install();
+  timer_install();
+  enable_interrupts();
 }
 
 void kernel_main(void) {
+  int i = 0;
   printf("Hello, kernel World!\n");
   printf("UHUUUL %d %s %c", 10, "Aaaa", 'a');
-  printf("%d\n", 1 / 0);
+  // printf("%d\n", 1 / 0);
   printf("AQUI NAO!\n");
+
+ for(;;) {
+    asm("hlt");
+ }
 }

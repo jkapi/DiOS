@@ -4,6 +4,7 @@
 # This is declared in C as 'extern void gdt_flush(uint32_t gdt_ptr_addr);'
 .global gdt_flush     # Allows the C code to link to this
 gdt_flush:
+    cli
     mov 4(%esp), %eax
     lgdt (%eax)
     mov $0x10, %ax    # 0x10 is the offset in the GDT to our data segment
