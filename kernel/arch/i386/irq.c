@@ -96,7 +96,6 @@ void irq_install() {
 //  an EOI command to the first controller. If you don't send
 //  an EOI, you won't raise any more IRQs
 void irq_handler(struct regs *r) {
-  printf("Handler called\n");
   // Blank function pointer
   void (*handler) (struct regs *r);
 

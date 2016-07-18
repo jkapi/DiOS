@@ -24,9 +24,7 @@ void kernel_early(void) {
 void kernel_main(void) {
   int i = 0;
   printf("Hello, kernel World!\n");
-  printf("UHUUUL %d %s %c", 10, "Aaaa", 'a');
-  // printf("%d\n", 1 / 0);
-  printf("AQUI NAO!\n");
+  printf("%d\n", 1 / 0);
 
  for(;;) {
     asm("hlt");
