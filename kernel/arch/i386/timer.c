@@ -18,14 +18,11 @@ void timer_phase(int hz) {
 // IRQ Handler for the timer. Called at every clock tick
 void timer_handler(struct regs *r) {
     timer_ticks++;
-    if (timer_ticks % TICKS_PER_SECOND == 0)  {
-        printf("One second has passed\n");
-    }
 }
 
 // Sets up the system clock
 void timer_install() {
     irq_install_handler(0, timer_handler);
     timer_phase(TICKS_PER_SECOND);
-    printf("Timer IRQ installed\n");
+    printf("Timer installed.\n");
 }

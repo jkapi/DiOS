@@ -18,13 +18,14 @@ void kernel_early(void) {
   isrs_install();
   irq_install();
   timer_install();
+  keyboard_install();
   enable_interrupts();
 }
 
 void kernel_main(void) {
   int i = 0;
   printf("Hello, kernel World!\n");
-  printf("%d\n", 1 / 0);
+  // printf("%d\n", 1 / 0);
 
  for(;;) {
     asm("hlt");
