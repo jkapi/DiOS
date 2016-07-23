@@ -24,7 +24,7 @@ void kernel_early(void) {
 
 void kernel_main(void) {
   int i = 0;
-  printf("Hello, kernel World!\n");
+  printf("Hello, kernel World%d!\n", 25);
   // printf("%d\n", 1 / 0);
 
  for(;;) {

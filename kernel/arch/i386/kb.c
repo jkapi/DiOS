@@ -3,6 +3,7 @@
 #include <kernel/idt.h>
 #include <kernel/irq.h>
 #include <kernel/isrs.h>
+#include <kernel/tty.h>
 
 struct kb_state {
   int caps_lock;
@@ -121,22 +122,29 @@ void keyboard_handler(__attribute__((unused)) struct regs *r) {
       state.shift_held = 0;
     }
   } else {
-    if (scancode == 42 || scancode == 54) {
-      state.shift_held = 1;
-    }
-    if (scancode == 58) {
-      state.caps_lock = !state.caps_lock;
-    }
-
-    column = state.shift_held * 1 + state.caps_lock * 2;
-    clicked = kbdus[scancode][column];
-    if (clicked != 0 && clicked != 27) {
-      putchar(clicked);
+    switch (scancode) {
+      case 14: // backspace
+        t_backspace();
+        break;
+      case 42: // shifts
+      case 54:
+        state.shift_held = 1;
+        break;
+      case 58: // caps lock
+        state.caps_lock = !state.caps_lock;
+        break;
+      default:
+        column = state.shift_held * 1 + state.caps_lock * 2;
+        clicked = kbdus[scancode][column];
+        if (clicked != 0 && clicked != 27) {
+          putchar(clicked);
+        }
+        break;
     }
   }
 }
 
-// Sets up the system clock
+// Sets up the keyboard
 void keyboard_install() {
   irq_install_handler(1, keyboard_handler);
   state.caps_lock = 0;

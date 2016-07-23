@@ -4,8 +4,9 @@
 #include <stddef.h>
 
 void terminal_initialize(void);
-void terminal_putchar(char c);
-void terminal_write(const char* data, size_t size);
-void terminal_writestring(const char* data);
+void t_backspace();
+void t_putchar(char c);
+void t_write(const char* data, size_t size);
+void t_writestring(const char* data);
 
 #endif  // _KERNEL_TTY_H

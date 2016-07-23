@@ -1,7 +1,11 @@
 #ifndef _KERNEL_VGA_H
 #define _KERNEL_VGA_H
 
+#include <asm.h>
 #include <stdint.h>
+
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
 
 enum vga_color
 {
@@ -23,20 +27,26 @@ enum vga_color
 	COLOR_WHITE = 15,
 };
 
-static inline uint8_t make_color(enum vga_color fg, enum vga_color bg)
-{
+static inline uint8_t make_color(enum vga_color fg, enum vga_color bg) {
 	return fg | bg << 4;
 }
 
-static inline uint16_t make_vgaentry(char c, uint8_t color)
-{
+static inline uint16_t make_vgaentry(char c, uint8_t color) {
 	uint16_t c16 = c;
 	uint16_t color16 = color;
 	return c16 | color16 << 8;
 }
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
+static inline void update_cursor(size_t row, size_t col) {
+  unsigned short position = (row * VGA_WIDTH) + col;
+
+  // cursor LOW port to vga INDEX register
+  outb(0x3D4, 0x0F);
+  outb(0x3D5, (unsigned char) (position & 0xFF));
+  // cursor HIGH port to vga INDEX register
+  outb(0x3D4, 0x0E);
+  outb(0x3D5, (unsigned char) ((position >> 8) & 0xFF));
+}
 
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
