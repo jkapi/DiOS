@@ -26,16 +26,17 @@ Resources
 beginner tutorials. Particularly, OSDev's [Meaty Skeleton][1] was used
 as the skeleton in this project.
 
-Then, [Bran's Kernel Development][1] was a great source for setting up the GDT,
+Then, [Bran's Kernel Development][2] was a great source for setting up the GDT,
 IDT and the timer/keyboard. Definitely check it out if you're lost after the 
 setting up your kernel.
 
-Finally, [Brokenthorn's OS Development Series][2], alongside OSDev, is being
+Finally, [Brokenthorn's OS Development Series][3], alongside OSDev, is being
 used to navigate the muddy waters of Memory Management.
 
-[0]:http://wiki.osdev.org/User:Sortie/Meaty_Skeleton
-[1]:http://www.osdever.net/bkerndev/Docs/gettingstarted.htm
-[2]:http://www.brokenthorn.com/Resources/OSDevPE.html
+[0]:http://wiki.osdev.org/
+[1]:http://wiki.osdev.org/User:Sortie/Meaty_Skeleton
+[2]:http://www.osdever.net/bkerndev/Docs/gettingstarted.htm
+[3]:http://www.brokenthorn.com/Resources/OSDevPE.html
 
 Installing
 ----------
