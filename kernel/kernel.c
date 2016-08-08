@@ -13,6 +13,7 @@
 #include <arch/i386/isrs.h>
 #include <arch/i386/tty.h>
 #include <libk/kphys_mem.h>
+#include <libk/kvirt_mem.h>
 
 void kernel_early(struct multiboot_info* mb) {
   terminal_initialize();
@@ -22,7 +23,8 @@ void kernel_early(struct multiboot_info* mb) {
   irq_install();
 
   phys_memory_init(mb);
-  
+  paging_install();
+
   timer_install();
   keyboard_install();
   enable_interrupts();

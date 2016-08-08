@@ -77,7 +77,7 @@ install: install-headers install-kernel
 
 install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	cp -RTv include $(DESTDIR)$(INCLUDEDIR)
+	cp -RTv ../include $(DESTDIR)$(INCLUDEDIR)
 
 install-kernel: dios.kernel
 	mkdir -p $(DESTDIR)$(BOOTDIR)
