@@ -1,7 +1,7 @@
 #include <asm.h>
 #include <stdio.h>
-#include <kernel/idt.h>
-#include <kernel/isrs.h>
+#include <arch/i386/idt.h>
+#include <arch/i386/isrs.h>
 
 // ISRs that point to our special IRQ handler
 extern void irq0();

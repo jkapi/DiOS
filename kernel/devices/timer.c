@@ -1,7 +1,8 @@
 #include <asm.h>
 #include <stdio.h>
-#include <kernel/idt.h>
-#include <kernel/irq.h>
+#include <arch/i386/idt.h>
+#include <arch/i386/irq.h>
+#include <devices/timer.h>
 
 #define TICKS_PER_SECOND 100
 

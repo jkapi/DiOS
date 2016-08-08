@@ -1,9 +1,10 @@
 #include <asm.h>
 #include <stdio.h>
-#include <kernel/idt.h>
-#include <kernel/irq.h>
-#include <kernel/isrs.h>
-#include <kernel/tty.h>
+#include <arch/i386/idt.h>
+#include <arch/i386/irq.h>
+#include <arch/i386/isrs.h>
+#include <arch/i386/tty.h>
+#include <devices/kb.h>
 
 struct kb_state {
   int caps_lock;

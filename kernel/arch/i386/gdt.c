@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <kernel/gdt.h>
+#include <arch/i386/gdt.h>
 
 // Defines a GDT entry. 
 struct gdt_entry {

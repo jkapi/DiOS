@@ -4,14 +4,14 @@
 #include <stdio.h>
 
 #include <asm.h>
+#include <devices/kb.h>
+#include <devices/timer.h>
 #include <external/multiboot.h>
-#include <kernel/gdt.h>
-#include <kernel/idt.h>
-#include <kernel/irq.h>
-#include <kernel/isrs.h>
-#include <kernel/kb.h>
-#include <kernel/timer.h>
-#include <kernel/tty.h>
+#include <arch/i386/gdt.h>
+#include <arch/i386/idt.h>
+#include <arch/i386/irq.h>
+#include <arch/i386/isrs.h>
+#include <arch/i386/tty.h>
 #include <libk/kphys_mem.h>
 
 void kernel_early(struct multiboot_info* mb) {

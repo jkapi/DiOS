@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <kernel/idt.h>
-#include <kernel/isrs.h>
+#include <arch/i386/idt.h>
+#include <arch/i386/isrs.h>
 
 // Function prototypes for exception handlers.
 // The first 32 entries in the IDT are reserved by Intel to service exceptions
