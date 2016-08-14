@@ -29,6 +29,10 @@ DEVICESDIR:=devices/
 
 include $(DEVICESDIR)/make.config
 
+TESTDIR:=test/
+
+include $(TESTDIR)/make.config
+
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
@@ -38,6 +42,7 @@ OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 $(LIBK_OBJS) \
 $(DEVICES_OBJS) \
+$(TEST_OBJS) \
 kernel.o \
 
 CRTI_OBJ:=$(ARCHDIR)/crti.o

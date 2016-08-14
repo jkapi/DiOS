@@ -14,6 +14,7 @@
 #include <arch/i386/tty.h>
 #include <libk/kphys_mem.h>
 #include <libk/kvirt_mem.h>
+#include <test/macros_test.h>
 
 void kernel_early(struct multiboot_info* mb) {
   terminal_initialize();
@@ -28,6 +29,8 @@ void kernel_early(struct multiboot_info* mb) {
   timer_install();
   keyboard_install();
   enable_interrupts();
+
+  test_macros();
 }
 
 void kernel_main(void) {
