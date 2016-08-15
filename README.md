@@ -11,11 +11,12 @@ Progress
 - ISRS/IRQs setup
 - Timer setup
 - Basic keyboard setup
+- Physical Memory Manager setup
+- Basic testing framework setup
 
 Under Construction
 ------------------
 
-- Memory Management
 - Pagination
 - Organizing of the file structure that's already a mess somehow
 
@@ -36,7 +37,7 @@ used to navigate the muddy waters of Memory Management.
 [0]:http://wiki.osdev.org/
 [1]:http://wiki.osdev.org/User:Sortie/Meaty_Skeleton
 [2]:http://www.osdever.net/bkerndev/Docs/gettingstarted.htm
-[3]:http://www.brokenthorn.com/Resources/OSDevPE.html
+[3]:http://www.brokenthorn.com/Resources/OSDevIndex.html
 
 Installing
 ----------
