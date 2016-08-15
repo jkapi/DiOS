@@ -31,7 +31,6 @@ void kernel_early(struct multiboot_info* mb) {
   keyboard_install();
   enable_interrupts();
 
-  test_macros();
   test_phys_mem();
 }
 

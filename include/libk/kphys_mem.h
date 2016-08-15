@@ -27,7 +27,7 @@ static uint32_t total_blocks_ = 0;
 void phys_memory_init(struct multiboot_info* mb);
 
 void* alloc_block();
-void* allocate_blocks(uint32_t count);
+void* alloc_blocks(uint32_t count);
 
 void free_block(void* p);
 void free_blocks(void* p, uint32_t count);

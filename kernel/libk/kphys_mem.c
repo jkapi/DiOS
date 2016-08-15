@@ -19,11 +19,12 @@ inline static bool map_test(int bit) {
 }
 
 int find_free_block() {
-  for (uint32_t i = 0; i < total_blocks_ / 32; i++) {
+  for (uint32_t i = 0; i < total_blocks_; i++) {
     uint32_t block = phys_memory_map_[i];
     if (block != 0xFFFFFFFF) {
       for (uint8_t j = 0; j < 32; j++) {
-        if ((1 << j) & block) {
+        int bit = 1 << j;
+        if (!(bit & block)) {
           return (32 * i) + j;
         }
       }
@@ -33,25 +34,28 @@ int find_free_block() {
 }
 
 int find_free_blocks(uint32_t count) {
-  uint32_t starting_block = 0;
-  uint32_t starting_block_bit = 0;
-  uint32_t cur_block_num = 0;
-  for (uint32_t i = 0; i < total_blocks_ / 32; i++) {
+  int starting_block = -1;
+  int starting_block_bit = -1;
+  int cur_block_num = 0;
+  for (uint32_t i = 0; i < total_blocks_; i++) {
     uint32_t cur_block = phys_memory_map_[i];
-    if (cur_block != 0xFFFFFFFF) {
-      if (!starting_block) starting_block = cur_block;
-      for (uint8_t j = 0; j < 32; j++) {
-        if ((1 << j) & cur_block) {
-          if (!starting_block_bit) starting_block_bit = j;
-          cur_block_num += 1;
-          if (cur_block_num == count) {
-            return (32 * starting_block) + starting_block_bit; 
-          }
-        } else {
-          starting_block = 0;
-          starting_block_bit = 0;
-          cur_block_num = 0;          
-        }
+    if (cur_block == 0xFFFFFFFF) {
+      cur_block_num = 0;
+      continue;
+    } 
+
+    for (uint8_t j = 0; j < 32; j++) {
+      int bit = 1 << j;
+      if (bit & cur_block) {  // bit is set
+        cur_block_num = 0;
+        continue;
+      }
+
+      if (!cur_block_num) starting_block = i;
+      if (!cur_block_num) starting_block_bit = j;
+      cur_block_num += 1;
+      if (cur_block_num == count) {
+        return (32 * starting_block) + starting_block_bit; 
       }
     }
   } 
@@ -65,7 +69,6 @@ void* alloc_block() {
   }
 
   int free_block = find_free_block();
-  printf("Free block found %d\n", free_block);
   if (free_block == -1) {
     return 0;
   }
@@ -73,7 +76,6 @@ void* alloc_block() {
   map_set(free_block);
   uint32_t addr = free_block * PHYS_BLOCK_SIZE;
   used_blocks_++;
-  printf("Allocated: %x\n", addr);
   return (void*) addr;
 }
 
@@ -93,7 +95,7 @@ bool is_alloced(void* p) {
 
 // Functions to allocate multiple blocks of memory
 
-void* allocate_blocks(uint32_t count) {
+void* alloc_blocks(uint32_t count) {
   if (total_blocks_ - used_blocks_ <= 0) {
     return 0;
   }
