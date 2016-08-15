@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-typedef int (*fn_ptr)();
+typedef char* (*fn_ptr)();
 
 // Defines macros for testing
 
