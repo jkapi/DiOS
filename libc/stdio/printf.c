@@ -10,16 +10,43 @@ typedef enum {
   LONG,
   LONG_LONG} length_specifier;
 
-#define print_int(__type, __base, __parameters) {      \
+#define print_num(__type, __base, __num) {             \
   char buffer[20];                                     \
   int count = 0;                                       \
-  __type num = va_arg(__parameters, __type);           \
   while (num != 0) {                                   \
     buffer[count++] = digits[num % __base];            \
     num /= base;                                       \
   }                                                    \
   for (size_t i = count; i != 0; i--)                  \
     putchar(buffer[i - 1]);                            \
+}
+
+#define print_short(__type, __base, __parameters) {    \
+  __type num = va_arg(__parameters, int);              \
+  if (num < 0) {                                       \
+    putchar('-');                                      \
+    num *= -1;                                         \
+  }                                                    \
+  print_num(__type, __base, num);                      \
+};
+
+#define print_ushort(__type, __base, __parameters) {   \
+  __type num = va_arg(__parameters, int);              \
+  print_num(__type, __base, num);                      \
+};
+
+#define print_int(__type, __base, __parameters) {      \
+  __type num = va_arg(__parameters, __type);           \
+  if (num < 0) {                                       \
+    putchar('-');                                      \
+    num *= -1;                                         \
+  }                                                    \
+  print_num(__type, __base, num);                      \
+};
+
+#define print_uint(__type, __base, __parameters) {     \
+  __type num = va_arg(__parameters, __type);           \
+  print_num(__type, __base, num);                      \
 };
 
 const char digits[] = "0123456789abcdef";
@@ -133,31 +160,39 @@ int printf(const char* restrict format, ...) {
 
     if (is_number) {
       switch (length) {
-        // SHORT won't be able to use my macro apparently :/
-        // So, for now, no SHORT support
         case SHORT_SHORT:
+          if (is_signed) {
+            print_short(signed char, base, parameters);
+          } else {
+            print_ushort(unsigned char, base, parameters);
+          }
           break;
         case SHORT:
+          if (is_signed) {
+            print_short(short int, base, parameters);
+          } else {
+            print_ushort(unsigned short int, base, parameters);
+          }
           break;
         case DEFAULT:
           if (is_signed) {
             print_int(int, base, parameters);
           } else {
-            print_int(unsigned int, base, parameters);
+            print_uint(unsigned int, base, parameters);
           }
           break;
         case LONG:
           if (is_signed) {
             print_int(long int, base, parameters);
           } else {
-            print_int(unsigned long int, base, parameters);
+            print_uint(unsigned long int, base, parameters);
           }
           break;
         case LONG_LONG:
           if (is_signed) {
             print_int(long long int, base, parameters);
           } else {
-            print_int(unsigned long long int, base, parameters);
+            print_uint(unsigned long long int, base, parameters);
           }
           break;
       }

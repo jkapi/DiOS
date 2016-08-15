@@ -16,6 +16,11 @@ typedef char* (*fn_ptr)();
     return message;                                  \
 } while (0)
 
+#define EXPECT_FALSE(message, expression) do {       \
+  if (expression)                                    \
+    return message;                                  \
+} while (0)
+
 #define RUN_TESTS(tests_arr, size) do {              \
   int tests_failed = 0;                              \
   for (int i = 0; i < size; i++) {                   \
