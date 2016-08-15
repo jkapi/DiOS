@@ -87,7 +87,7 @@ void paging_install() {
   }
 
   // Create default directory table
-  cur_directory = (page_directory*) alloc_block(3);
+  cur_directory = (page_directory*) alloc_blocks(3);
   if (!cur_directory)
     return;
 
@@ -104,4 +104,5 @@ void paging_install() {
   pd_entry_set_frame(entry2, (physical_addr) table2);
 
   enable_paging((uint32_t) cur_directory);
+  printf("Paging installed.\n");
 }

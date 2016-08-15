@@ -25,7 +25,7 @@ void kernel_early(struct multiboot_info* mb) {
   irq_install();
 
   phys_memory_init(mb);
-  // paging_install();
+  paging_install();
 
   timer_install();
   keyboard_install();

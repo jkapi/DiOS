@@ -36,7 +36,7 @@ int find_free_block() {
 int find_free_blocks(uint32_t count) {
   int starting_block = -1;
   int starting_block_bit = -1;
-  int cur_block_num = 0;
+  uint32_t cur_block_num = 0;
   for (uint32_t i = 0; i < total_blocks_; i++) {
     uint32_t cur_block = phys_memory_map_[i];
     if (cur_block == 0xFFFFFFFF) {
