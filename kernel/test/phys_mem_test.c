@@ -1,5 +1,5 @@
 #include <test/unit.h>
-#include <libk/kphys_mem.h>
+#include <libk/phys_mem.h>
 
 TEST(AllocBlock) {
   void* addr = alloc_block();

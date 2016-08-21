@@ -4,7 +4,7 @@
 #include <asm.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <libk/kpaging.h>
+#include <libk/paging.h>
 
 #define PAGES_PER_TABLE 1024
 #define PAGES_PER_DIR 1024

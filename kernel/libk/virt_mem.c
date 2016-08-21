@@ -1,5 +1,5 @@
 #include <string.h>
-#include <libk/kvirt_mem.h>
+#include <libk/virt_mem.h>
 
 bool alloc_page(pt_entry* entry) {
   void* addr = alloc_block();

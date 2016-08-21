@@ -37,11 +37,6 @@ void irq_uninstall_handler(int irq) {
   irq_routines[irq] = 0;
 }
 
-static void pic_mask(int pic_num, uint16_t mask) {
-    uint16_t port = (pic_num == 1) ? 0x21 : 0xA1;
-    outb(port, mask);
-}
-
 //  Normally, IRQs 0 to 7 are mapped to entries 8 to 15. This
 //  is a problem in protected mode, because IDT entry 8 is a
 //  Double Fault! Without remapping, every time IRQ0 fires,

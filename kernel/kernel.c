@@ -12,8 +12,8 @@
 #include <arch/i386/irq.h>
 #include <arch/i386/isrs.h>
 #include <arch/i386/tty.h>
-#include <libk/kphys_mem.h>
-#include <libk/kvirt_mem.h>
+#include <libk/phys_mem.h>
+#include <libk/virt_mem.h>
 #include <test/macros_test.h>
 #include <test/phys_mem_test.h>
 

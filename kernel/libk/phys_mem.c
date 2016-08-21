@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include <external/multiboot.h>
-#include <libk/kphys_mem.h>
+#include <libk/phys_mem.h>
 
 // Functions to manipulate the bitmap
 
@@ -174,7 +174,7 @@ void phys_memory_init(struct multiboot_info* mb) {
 
   // We also need to allocate the memory used by the Physical Map itself
   allocate_chunk(*phys_memory_map_, total_blocks_);
-  printf("PhysMem Manager installed. %lxKB, %lx blocks, %lx free blocks.\n",
-    phys_mem_size_kb_, total_blocks_, total_blocks_ - used_blocks_);
+  printf("PhysMem Manager installed. kernel_start %lx, kernel_end %lx\n",
+    KERNEL_START_ADDR, KERNEL_END_ADDR);
 }
 
