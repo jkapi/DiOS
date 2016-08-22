@@ -16,6 +16,8 @@
 #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
 #define PAGE_GET_PHYSICAL_ADDRESS(x) (*x & ~0xFFF)
  
+extern uint32_t _boot_page_directory;
+
 typedef uint32_t virtual_addr;
 
 // Page Directory holds 1024 page directory entries
@@ -46,7 +48,10 @@ inline pd_entry* pdirectory_lookup_entry(page_directory* directory,
 bool alloc_page(pt_entry* e);
 void free_page(pt_entry* e);
 void map_page(void* physical_addr, void* virtual_addr);
+uint32_t virt_to_phys(virtual_addr addr);
+
 void paging_install();
+
 
 extern enable_paging(uint32_t page_dir);
 

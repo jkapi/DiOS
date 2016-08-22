@@ -36,7 +36,11 @@ void kernel_early(struct multiboot_info* mb) {
 
 void kernel_main(void) {
   printf("Hello, kernel World %d!\n", 25);
- for(;;) {
+  int a = 10;
+  printf("%lx\n", &a);
+  uint32_t phys = virt_to_phys(&a);
+  printf("%lx \n", phys);
+  for(;;) {
     asm("hlt");
- }
+  }
 }

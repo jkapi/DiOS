@@ -49,18 +49,31 @@ void map_page(void* physical_addr, void* virtual_addr) {
    pt_entry_add_attrib(page, I86_PTE_PRESENT);
 }
 
+uint32_t virt_to_phys(virtual_addr addr) {
+  pd_entry* pd_entry = pdirectory_lookup_entry(cur_directory, addr);
+  if (!pd_entry)
+    return -1;
+
+  pt_entry* pt_entry = ptable_lookup_entry(cur_directory, addr);
+  if (!pt_entry)
+    return -2;
+
+  printf("%lx %lx\n", pd_entry, pt_entry);
+  return pt_entry_frame(pt_entry);
+}
+
 void paging_install() {
    // Allocates default page table
-   page_table* table = (page_table*) alloc_block();
-   if (!table)
-      return;
+  page_table* table = (page_table*) alloc_block();
+  if (!table)
+     return;
 
    // Allocates 3GB page table
    page_table* table2 = (page_table*) alloc_block();
    if (!table2)
       return;
 
-   // Clear allocated page tables
+  //  // Clear allocated page tables
    memset(table, 0, sizeof(page_table));
    memset(table2, 0, sizeof(page_table));
 
@@ -72,28 +85,28 @@ void paging_install() {
     pt_entry_add_attrib(&page, I86_PTE_PRESENT);
     pt_entry_set_frame(&page, frame);
 
-    table2->m_entries[PAGE_TABLE_INDEX(virt)] = page;
+    table->m_entries[PAGE_TABLE_INDEX(virt)] = page;
   }
 
   // Maps 1MB physical memory to 3GB (kernel)
-  for (int i = 0, frame = 0x100000, virt = 0xC0000000; i < 1024;
+  for (int i = 0, frame = 0x100000, virt = 0xC0100000; i < 1024;
     i++, frame += 4096, virt += 4096) {
 
     pt_entry page = 0;
     pt_entry_add_attrib(&page, I86_PTE_PRESENT);
     pt_entry_set_frame(&page, frame);
 
-    table->m_entries[PAGE_TABLE_INDEX(virt)] = page;
+    table2->m_entries[PAGE_TABLE_INDEX(virt)] = page;
   }
 
   // Create default directory table
-  cur_directory = (page_directory*) alloc_blocks(3);
-  if (!cur_directory)
-    return;
+  cur_directory = (page_directory*) _boot_page_directory;
+  // if (!cur_directory)
+  //   return;
 
   memset(cur_directory, 0, sizeof (page_directory));
 
-  pd_entry* entry = pdirectory_lookup_entry(cur_directory, 0xC0000000);
+  pd_entry* entry = pdirectory_lookup_entry(cur_directory, 0xC0100000);
   pd_entry_add_attrib(entry, I86_PDE_PRESENT);
   pd_entry_add_attrib(entry, I86_PDE_WRITABLE);
   pd_entry_set_frame(entry, (physical_addr) table);
@@ -103,6 +116,7 @@ void paging_install() {
   pd_entry_add_attrib(entry2, I86_PDE_WRITABLE);
   pd_entry_set_frame(entry2, (physical_addr) table2);
 
-  enable_paging((uint32_t) cur_directory);
+  // commented out because bringing it in crashes it, understand why
+  // enable_paging((uint32_t) cur_directory);
   printf("Paging installed.\n");
 }
