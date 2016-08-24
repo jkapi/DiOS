@@ -73,9 +73,9 @@ void paging_install() {
    if (!table2)
       return;
 
-  //  // Clear allocated page tables
-   memset(table, 0, sizeof(page_table));
-   memset(table2, 0, sizeof(page_table));
+  // Clear allocated page tables
+  memset(table, 0, sizeof(page_table));
+  memset(table2, 0, sizeof(page_table));
 
   // Maps the page table to the first 4MB of physical memory
   for (int i = 0, frame = 0x0, virt = 0x00000000; i < 1024;
@@ -100,23 +100,22 @@ void paging_install() {
   }
 
   // Create default directory table
-  cur_directory = (page_directory*) _boot_page_directory;
-  // if (!cur_directory)
-  //   return;
+  cur_directory = (page_directory*) alloc_blocks(3);
+  if (!cur_directory)
+    return;
 
-  memset(cur_directory, 0, sizeof (page_directory));
+  memset(cur_directory, 0, sizeof(page_directory));
 
-  pd_entry* entry = pdirectory_lookup_entry(cur_directory, 0xC0100000);
+  pd_entry* entry = pdirectory_lookup_entry(cur_directory, 0x00000000);
   pd_entry_add_attrib(entry, I86_PDE_PRESENT);
   pd_entry_add_attrib(entry, I86_PDE_WRITABLE);
   pd_entry_set_frame(entry, (physical_addr) table);
 
-  pd_entry* entry2 = pdirectory_lookup_entry(cur_directory, 0x00000000);
+  pd_entry* entry2 = pdirectory_lookup_entry(cur_directory, 0xC0100000);
   pd_entry_add_attrib(entry2, I86_PDE_PRESENT);
   pd_entry_add_attrib(entry2, I86_PDE_WRITABLE);
   pd_entry_set_frame(entry2, (physical_addr) table2);
 
-  // commented out because bringing it in crashes it, understand why
-  // enable_paging((uint32_t) cur_directory);
+  enable_paging((uint32_t) cur_directory);
   printf("Paging installed.\n");
 }

@@ -38,8 +38,6 @@ void kernel_main(void) {
   printf("Hello, kernel World %d!\n", 25);
   int a = 10;
   printf("%lx\n", &a);
-  uint32_t phys = virt_to_phys(&a);
-  printf("%lx \n", phys);
   for(;;) {
     asm("hlt");
   }

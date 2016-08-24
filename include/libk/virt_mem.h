@@ -16,7 +16,7 @@
 #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
 #define PAGE_GET_PHYSICAL_ADDRESS(x) (*x & ~0xFFF)
  
-extern uint32_t _boot_page_directory;
+extern enable_paging(uint32_t page_dir);
 
 typedef uint32_t virtual_addr;
 
@@ -51,9 +51,6 @@ void map_page(void* physical_addr, void* virtual_addr);
 uint32_t virt_to_phys(virtual_addr addr);
 
 void paging_install();
-
-
-extern enable_paging(uint32_t page_dir);
 
 inline void flush_tlb_entry(virtual_addr addr) {
   invlpg((void *) addr);
