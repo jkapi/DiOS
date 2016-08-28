@@ -3,19 +3,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-#define KERNEL_START_ADDR ((uint32_t) &kernel_start)
-#define KERNEL_END_ADDR ((uint32_t) &kernel_end)
-#define KERNEL_SIZE (KERNEL_START_ADDR - KERNEL_END_ADDR)
+#include <libk/memlayout.h>
 
 #define PHYS_BLOCKS_PER_BYTE 8
 #define PHYS_BLOCK_SIZE 4096
-
-typedef uint32_t physical_addr;
-
-// Constants defined in the linker
-extern uint32_t kernel_start;
-extern uint32_t kernel_end;
 
 // Physical memory manager
 // Currently implemented using bit map based allocation

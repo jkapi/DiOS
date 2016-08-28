@@ -6,7 +6,9 @@ SECTIONS {
      address space, which will be mapped to 1MB in the
      physical address space. */
   . = 0xC0100000;
-  kernel_start = .;
+
+  kernel_virt_start = .;
+  kernel_phys_start = . - 0xC0000000;
 
   .text : AT(ADDR(.text) - 0xC0000000) {
     *(.multiboot)
@@ -31,5 +33,6 @@ SECTIONS {
     . = ALIGN(0x1000);
   }
 
-  kernel_end = . ;
+  kernel_virt_end = .;
+  kernel_phys_end = . - 0xC00000000;
 }

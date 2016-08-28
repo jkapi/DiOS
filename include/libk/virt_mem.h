@@ -4,6 +4,7 @@
 #include <asm.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <libk/memlayout.h>
 #include <libk/paging.h>
 
 #define PAGES_PER_TABLE 1024
@@ -17,8 +18,6 @@
 #define PAGE_GET_PHYSICAL_ADDRESS(x) (*x & ~0xFFF)
  
 extern enable_paging(uint32_t page_dir);
-
-typedef uint32_t virtual_addr;
 
 // Page Directory holds 1024 page directory entries
 typedef struct page_directory {

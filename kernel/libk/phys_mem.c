@@ -163,18 +163,18 @@ void phys_memory_init(struct multiboot_info* mb) {
   phys_mem_size_kb_ = mb->mem_upper + mb->mem_lower;
   total_blocks_ = (phys_mem_size_kb_ * 1024) / PHYS_BLOCK_SIZE;
   used_blocks_ = total_blocks_;
-  phys_memory_map_ = (uint32_t*) KERNEL_END_ADDR;
+  phys_memory_map_ = (uint32_t*) KERNEL_END_PADDR;
   memset(phys_memory_map_, 0xFF, total_blocks_ / PHYS_BLOCKS_PER_BYTE);
 
   // Frees memory GRUB considers available
   free_available_memory(mb);
 
   // From the freed memory, we need to allocate the ones used by the Kernel
-  allocate_chunk(KERNEL_START_ADDR, KERNEL_SIZE);
+  allocate_chunk(KERNEL_START_PADDR, KERNEL_SIZE);
 
   // We also need to allocate the memory used by the Physical Map itself
   allocate_chunk(*phys_memory_map_, total_blocks_);
   printf("PhysMem Manager installed. kernel_start %lx, kernel_end %lx\n",
-    KERNEL_START_ADDR, KERNEL_END_ADDR);
+    KERNEL_START_PADDR, KERNEL_END_PADDR);
 }
 
