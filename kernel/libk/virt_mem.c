@@ -77,9 +77,9 @@ void paging_install() {
   memset(table, 0, sizeof(page_table));
   memset(table2, 0, sizeof(page_table));
 
-  // Maps the page table to the first 4MB of physical memory
-  for (int i = 0, frame = 0x0, virt = 0x00000000; i < 1024;
-      i++, frame += 4096, virt += 4096) {
+  // Maps first 1MB to 3GB+1MB
+  for (int frame = 0x0, virt = 0xC0000000; frame < 0x100000;
+      frame += 4096, virt += 4096) {
 
     pt_entry page = 0;
     pt_entry_add_attrib(&page, I86_PTE_PRESENT);
@@ -88,7 +88,7 @@ void paging_install() {
     table->m_entries[PAGE_TABLE_INDEX(virt)] = page;
   }
 
-  // Maps 1MB physical memory to 3GB (kernel)
+  // Maps kernel to start from 3GB+1MB
   for (int i = 0, frame = 0x100000, virt = 0xC0100000; i < 1024;
     i++, frame += 4096, virt += 4096) {
 
