@@ -25,13 +25,12 @@ void kernel_early(struct multiboot_info* mb) {
   irq_install();
 
   phys_memory_init(mb);
-  paging_install();
+  virt_memory_init();
+  test_phys_mem();
 
   timer_install();
   keyboard_install();
   enable_interrupts();
-
-  test_phys_mem();
 }
 
 void kernel_main(void) {

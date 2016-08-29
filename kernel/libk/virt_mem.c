@@ -62,22 +62,22 @@ uint32_t virt_to_phys(virtual_addr addr) {
   return pt_entry_frame(pt_entry);
 }
 
-void paging_install() {
-   // Allocates default page table
+void virt_memory_init() {
+  // Allocates first MB page table
   page_table* table = (page_table*) alloc_block();
   if (!table)
      return;
 
-   // Allocates 3GB page table
-   page_table* table2 = (page_table*) alloc_block();
-   if (!table2)
-      return;
+  // Allocates kernel page table
+  page_table* table2 = (page_table*) alloc_block();
+  if (!table2)
+    return;
 
   // Clear allocated page tables
   memset(table, 0, sizeof(page_table));
   memset(table2, 0, sizeof(page_table));
 
-  // Maps first 1MB to 3GB+1MB
+  // Maps first MB to 3GB
   for (int frame = 0x0, virt = 0xC0000000; frame < 0x100000;
       frame += 4096, virt += 4096) {
 
@@ -88,9 +88,9 @@ void paging_install() {
     table->m_entries[PAGE_TABLE_INDEX(virt)] = page;
   }
 
-  // Maps kernel to start from 3GB+1MB
-  for (int i = 0, frame = 0x100000, virt = 0xC0100000; i < 1024;
-    i++, frame += 4096, virt += 4096) {
+  // Maps kernel pages and phys mem pages
+  for (int frame = KERNEL_START_PADDR, virt = KERNEL_START_VADDR; 
+    frame < KERNEL_PHYS_MAP_END; frame += 4096, virt += 4096) {
 
     pt_entry page = 0;
     pt_entry_add_attrib(&page, I86_PTE_PRESENT);
@@ -117,5 +117,8 @@ void paging_install() {
   pd_entry_set_frame(entry2, (physical_addr) table2);
 
   enable_paging((uint32_t) cur_directory);
+
+  // Updates the Phys Mem table to its new virtual address
+  update_map_addr(KERNEL_END_VADDR);
   printf("Paging installed.\n");
 }

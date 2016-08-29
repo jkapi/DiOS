@@ -34,5 +34,5 @@ SECTIONS {
   }
 
   kernel_virt_end = .;
-  kernel_phys_end = . - 0xC00000000;
+  kernel_phys_end = . - 0xC0000000;
 }

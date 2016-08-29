@@ -49,7 +49,7 @@ void free_page(pt_entry* e);
 void map_page(void* physical_addr, void* virtual_addr);
 uint32_t virt_to_phys(virtual_addr addr);
 
-void paging_install();
+void virt_memory_init();
 
 inline void flush_tlb_entry(virtual_addr addr) {
   invlpg((void *) addr);

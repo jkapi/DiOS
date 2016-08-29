@@ -165,6 +165,7 @@ void phys_memory_init(struct multiboot_info* mb) {
   used_blocks_ = total_blocks_;
   phys_memory_map_ = (uint32_t*) KERNEL_END_PADDR;
   memset(phys_memory_map_, 0xFF, total_blocks_ / PHYS_BLOCKS_PER_BYTE);
+  printf("Total blocks: %d\n", total_blocks_);
 
   // Frees memory GRUB considers available
   free_available_memory(mb);
@@ -174,7 +175,12 @@ void phys_memory_init(struct multiboot_info* mb) {
 
   // We also need to allocate the memory used by the Physical Map itself
   allocate_chunk(*phys_memory_map_, total_blocks_);
-  printf("PhysMem Manager installed. kernel_start %lx, kernel_end %lx\n",
-    KERNEL_START_PADDR, KERNEL_END_PADDR);
+  kernel_phys_map_start = phys_memory_map_;
+  kernel_phys_map_end = phys_memory_map_ + total_blocks_ / PHYS_BLOCKS_PER_BYTE;
+  printf("PhysMem Manager installed. Mem Map start: %x, end: %x\n",
+    phys_memory_map_, kernel_phys_map_end);
 }
 
+void update_map_addr(uint32_t* addr) {
+  phys_memory_map_ = addr;
+}
