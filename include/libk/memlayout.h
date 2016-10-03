@@ -16,18 +16,15 @@
 #define KERNEL_PHYS_MAP_SIZE kernel_phys_map_end - kernel_phys_map_start;
 
 // Constants to the Physical Memory Manager
-
 #define PHYS_BLOCKS_PER_BYTE 8
 #define PHYS_BLOCK_SIZE 4096
 
-// Constants to the Kernel Heap
+// Constants to the Kernel heap
+#define HEAP_VIRT_ADDR_START 0xC0500000 // if kernel size > 4MB, change
 #define HEAP_INITIAL_BLOCK_SIZE 128
 
 // Functions to
 #define ALIGN_BLOCK(addr) (addr) - ((addr) % PHYS_BLOCK_SIZE);
-
-// Holds up to what Virtual address the kernel is using as of now
-uint32_t kernel_max_virt_addr;
 
 // Addresses of the Kernel in the Physical and Virtual memory
 extern uint32_t kernel_phys_start;

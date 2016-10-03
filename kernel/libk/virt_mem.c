@@ -1,31 +1,38 @@
 #include <string.h>
 #include <libk/virt_mem.h>
 
-bool alloc_page(pt_entry* entry) {
-  void* addr = alloc_block();
-  if (!addr) {
+bool alloc_page(void* virtual_addr) {
+  void* physical_addr = alloc_block();
+  if (!physical_addr) {
     return false;
   }
 
-  pt_entry_set_frame(entry, (physical_addr) addr);
-  pt_entry_add_attrib(entry, I86_PTE_PRESENT);
+  map_page(physical_addr, virtual_addr);
   return true;
 }
 
-void free_page(pt_entry* entry) {
-  void* block = (void*) pt_entry_frame(*entry);
+void free_page(void* virtual_addr) {
+  pd_entry* pd_entry = pdirectory_lookup_entry(cur_directory, virtual_addr);
+  if (!pd_entry)
+    return;
+
+  page_table* table = (page_table*) PAGE_GET_PHYSICAL_ADDRESS(pd_entry);
+  pt_entry* pt_entry = ptable_lookup_entry(table, virtual_addr);
+  if (!pt_entry)
+    return;
+
+  void* block = (void*) pt_entry_frame(*pt_entry);
   if (block) {
     free_block(block);
   }
 
-  pt_entry_del_attrib(entry, I86_PTE_PRESENT);
+  pt_entry_del_attrib(pt_entry, I86_PTE_PRESENT);
 }
 
 void map_page(void* physical_addr, void* virtual_addr) {
   pd_entry* entry = pdirectory_lookup_entry(cur_directory, virtual_addr);
   if (!pd_entry_is_present(*entry)) {
     // Page Directory Entry not present, allocate it
-    printf("PDE not available\n");
     page_table* table = (page_table*) alloc_block();
     if (!table)
       return;
@@ -124,6 +131,5 @@ void virt_memory_init() {
 
   // Updates the Phys Mem table to its new virtual address
   update_map_addr(KERNEL_END_VADDR);
-  kernel_max_virt_addr = KERNEL_END_VADDR + KERNEL_PHYS_MAP_SIZE;
   printf("Paging installed.\n");
 }
