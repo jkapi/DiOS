@@ -5,9 +5,6 @@
 #include <stdint.h>
 #include <libk/memlayout.h>
 
-#define PHYS_BLOCKS_PER_BYTE 8
-#define PHYS_BLOCK_SIZE 4096
-
 // Physical memory manager
 // Currently implemented using bit map based allocation
 static uint32_t* phys_memory_map_ = 0;

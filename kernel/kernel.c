@@ -26,6 +26,7 @@ void kernel_early(struct multiboot_info* mb) {
 
   phys_memory_init(mb);
   virt_memory_init();
+  kernel_heap_init();
   test_phys_mem();
 
   timer_install();
@@ -36,7 +37,8 @@ void kernel_early(struct multiboot_info* mb) {
 void kernel_main(void) {
   printf("Hello, kernel World %d!\n", 25);
   int a = 10;
-  printf("%lx\n", &a);
+  printf("%lx \n", &a);
+  printf("aia %lx\n", virt_to_phys(&a));
   for(;;) {
     asm("hlt");
   }

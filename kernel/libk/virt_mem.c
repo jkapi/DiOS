@@ -25,28 +25,33 @@ void map_page(void* physical_addr, void* virtual_addr) {
   pd_entry* entry = pdirectory_lookup_entry(cur_directory, virtual_addr);
   if (!pd_entry_is_present(*entry)) {
     // Page Directory Entry not present, allocate it
+    printf("PDE not available\n");
     page_table* table = (page_table*) alloc_block();
     if (!table)
       return;
 
+    // Temporarily maps the new Page Table to the temporary table addr
+    map_page(table, 0xC03FF000);
+    invlpg(0xC03FF000);
+
     // Clear the newly allocated page
-    memset(table, 0, sizeof(page_table));
+    memset(0xC03FF000, 0, sizeof(page_table));
 
     // Maps the Page Directory Entry to the new table
     pd_entry_add_attrib(entry, I86_PDE_PRESENT);
     pd_entry_add_attrib(entry, I86_PDE_WRITABLE);
-    pd_entry_set_frame(entry, table);
+    pd_entry_set_frame(entry, 0xC03FF000);
   }
 
-   // Get table address from entry, guaranteed to be set now
-   page_table* table = (page_table*) PAGE_GET_PHYSICAL_ADDRESS(entry);
+  // Get table address from entry, guaranteed to be set now
+  page_table* table = (page_table*) PAGE_GET_PHYSICAL_ADDRESS(entry);
 
-   // Get page table entry
-   pt_entry* page = ptable_lookup_entry(table, virtual_addr);
+  // Get page table entry
+  pt_entry* page = ptable_lookup_entry(table, virtual_addr);
 
-    // Maps the Page Table Entry to the given physical address
-   pt_entry_set_frame(page, physical_addr);
-   pt_entry_add_attrib(page, I86_PTE_PRESENT);
+  // Maps the Page Table Entry to the given physical address
+  pt_entry_set_frame(page, physical_addr);
+  pt_entry_add_attrib(page, I86_PTE_PRESENT);
 }
 
 uint32_t virt_to_phys(virtual_addr addr) {
@@ -54,12 +59,10 @@ uint32_t virt_to_phys(virtual_addr addr) {
   if (!pd_entry)
     return -1;
 
-  pt_entry* pt_entry = ptable_lookup_entry(cur_directory, addr);
-  if (!pt_entry)
-    return -2;
+  page_table* table = (page_table*) PAGE_GET_PHYSICAL_ADDRESS(pd_entry);
+  pt_entry* pt_entry = ptable_lookup_entry(table, addr);
 
-  printf("%lx %lx\n", pd_entry, pt_entry);
-  return pt_entry_frame(pt_entry);
+  return PAGE_GET_PHYSICAL_ADDRESS(pt_entry);
 }
 
 void virt_memory_init() {
@@ -89,6 +92,7 @@ void virt_memory_init() {
   }
 
   // Maps kernel pages and phys mem pages
+  // TODO(psamora) What if kernel is > 4MB?
   for (int frame = KERNEL_START_PADDR, virt = KERNEL_START_VADDR; 
     frame < KERNEL_PHYS_MAP_END; frame += 4096, virt += 4096) {
 
@@ -120,5 +124,6 @@ void virt_memory_init() {
 
   // Updates the Phys Mem table to its new virtual address
   update_map_addr(KERNEL_END_VADDR);
+  kernel_max_virt_addr = KERNEL_END_VADDR + KERNEL_PHYS_MAP_SIZE;
   printf("Paging installed.\n");
 }
