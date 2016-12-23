@@ -19,6 +19,11 @@
 #define PHYS_BLOCKS_PER_BYTE 8
 #define PHYS_BLOCK_SIZE 4096
 
+// Constants to the Virtual Memory Manager
+#define PAGES_PER_TABLE 1024
+#define PAGES_PER_DIR 1024
+#define PAGE_SIZE 4096
+
 // Constants to the Kernel heap
 #define HEAP_VIRT_ADDR_START 0xC0500000 // if kernel size > 4MB, change
 #define HEAP_INITIAL_BLOCK_SIZE 128

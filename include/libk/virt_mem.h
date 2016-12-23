@@ -7,12 +7,6 @@
 #include <libk/memlayout.h>
 #include <libk/paging.h>
 
-#define PAGES_PER_TABLE 1024
-#define PAGES_PER_DIR 1024
-#define PAGE_SIZE 4096
-#define PTABLE_ADDR_SPACE_SIZE 0x400000    // 4MB
-#define DTABLE_ADDR_SPACE_SIZE 0x100000000 // 4GB
-
 #define PAGE_DIRECTORY_INDEX(x) (((x) >> 22) & 0x3FF)
 #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
 #define PAGE_GET_PHYSICAL_ADDRESS(x) (*x & ~0xFFF)
