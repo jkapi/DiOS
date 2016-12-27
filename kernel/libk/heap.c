@@ -11,6 +11,10 @@ void kernel_heap_init() {
 
 // TODO(psamora) Make it work for > 4096, refactor
 void* kmalloc(size_t bytes) {
+	if (bytes == 0) {
+		return NULL;
+	}
+	
 	// Find the first block that can fit our requested memory
 	meta_alloc_t* free_block = first_free_block(&free_list_, bytes);
 

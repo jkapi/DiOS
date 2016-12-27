@@ -30,8 +30,8 @@ void kernel_early(struct multiboot_info* mb) {
   virt_memory_init();
   kernel_heap_init();
   test_macros();
-  // test_phys_mem();
-  // test_heap();
+  test_phys_mem();
+  test_heap();
 
   timer_install();
   keyboard_install();

@@ -1,53 +1,104 @@
 #include <libk/heap.h>
 #include <test/unit.h>
 
-SUITE(HeapTest);
+NEW_SUITE(HeapTest, 10);
+
+extern free_list_t free_list_;
+
+TEST(EmptyMalloc) {
+  EXPECT_EQ(NULL, kmalloc(0));
+}
 
 TEST(Malloc) {
   size_t size = sizeof(int) * 10;
   int* ptr = kmalloc(size);
 
-  meta_alloc_t* metadata = get_metadata(ptr);
-  EXPECT_EQ("Basic kmalloc test/1", metadata->size, size);
-  EXPECT_EQ("Basic kmalloc test/2", metadata->checksum, MALLOCED_CHECKSUM);
-  EXPECT_EQ("Basic kmalloc test/3", metadata->next, NULL);
-  return 0;
+  meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
+  EXPECT_EQ(metadata->size, size);
+  EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
+  EXPECT_EQ(metadata->next, NULL);
+  PASS();
+
+  // Clean-up
+  kfree(ptr);
 }
 
 TEST(FreeNull) {
   kfree(NULL);
-  return 0;
+  PASS();
 }
 
 TEST(FreeNotMallocedDoesntWork) {
   // TODO(psamora) When we add abort,  figure out how to test this
   char* ptr = kmalloc(1);
-  meta_alloc_t* metadata = get_metadata(ptr);
+  meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
 
   // Since we are not freeing the right pointer, nothing will happen
   kfree(ptr + 1);
 
-  EXPECT_EQ("Free but not malloced test/1", metadata->size, 1);
-  EXPECT_EQ("Free but not malloced test/2", metadata->checksum,
-    MALLOCED_CHECKSUM);
-  EXPECT_EQ("Free but not malloced test/3", metadata->next, NULL);
-  return 0;
+  EXPECT_EQ(metadata->size, 1);
+  EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
+  EXPECT_EQ(metadata->next, NULL);
+  PASS();
+
+  // Clean-up
+  kfree(ptr);
 }
 
 TEST(FreeMalloced) {
   char* ptr = kmalloc(25);
-  meta_alloc_t* metadata = get_metadata(ptr);
+  meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
   kfree(ptr);
-  EXPECT_EQ("Malloc and free test/1", metadata->size, 1);
-  EXPECT_EQ("Malloc and free test/2", metadata->checksum,
-    MALLOCED_CHECKSUM);
-  EXPECT_EQ("Malloc and free test/3", metadata->next, NULL);
-  return 0;
+  EXPECT_EQ(metadata->size, 25);
+  EXPECT_NE(metadata->checksum, MALLOCED_CHECKSUM);
+  EXPECT_NE(metadata->next, NULL);
+  PASS();
 }
 
+TEST(FreeListCorrectlyPopulated) {
+  // Populate the free_list with 10 free blocks of increasing size
+  for (size_t i = 1; i <= 10; i++) {
+    char* ptr = kmalloc(i);
+    kfree(ptr);
+  }
+
+  meta_alloc_t* cur_metadata = free_list_.head;
+
+  // Check the first 10 free blocks in the FreeList are in decreasing order
+  for (size_t i = 10; i > 9; i--) {
+    EXPECT_EQ(cur_metadata->size, i);
+    EXPECT_NE(cur_metadata->checksum, MALLOCED_CHECKSUM);
+    EXPECT_NE(cur_metadata->next, NULL);
+    cur_metadata = cur_metadata->next;
+  }
+  PASS();
+}
+
+TEST(SplittingBlockOfMemory) {
+  size_t large_block_size = 200;
+
+  // Allocate large block and free it so it is in the front of the FreeList
+  char* ptr = kmalloc(large_block_size);
+  kfree(ptr);
+
+  // Allocate 10 blocks, asserting the block in the front keeps decreasing
+  // since we are just splitting the block above
+  for (size_t i = 1; i <= 10; i++) {
+    char* ptr = kmalloc(i);
+
+    large_block_size -= i + META_ALLOC_SIZE;
+
+    meta_alloc_t* free_metadata = free_list_.head;
+    EXPECT_EQ(free_metadata->size, large_block_size);
+    EXPECT_NE(free_metadata->checksum, MALLOCED_CHECKSUM);
+
+    // Clean-up
+    kfree(ptr);
+  }
+}
+
+END_SUITE();
+
 void test_heap() {
-  fn_ptr tests[3] = {
-    Malloc, FreeNull, FreeNotMallocedDoesntWork
-  };
-  RUN_TESTS(tests, 3);
+  RUN_SUITE(HeapTest);
 }

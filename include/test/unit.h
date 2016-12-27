@@ -30,8 +30,8 @@ typedef struct test_info_t {
     printf("Test suite %s passed! %d/%d\n", name,    \
       test_count, test_count);                       \
   } else {                                           \
-    printf("Test suite %s failed! %d/%d\n", name,    \
-      failed_tests, test_count);                     \    
+    printf("Test suite %s failed! %d/%d passed\n",   \
+      name, test_count - failed_tests, test_count);  \    
   }                                                  \
 }                                                    \
 
@@ -62,13 +62,28 @@ typedef struct test_info_t {
     TEST_FAILED();                                   \
 } while (0)
 
-#define EXPECT_GT(expected, result) do {             \
-  if (result >= expected)                            \
+#define EXPECT_NE(expected, result) do {             \
+  if (expected == result)                            \
     TEST_FAILED();                                   \
 } while (0)
 
-#define EXPECT_LT(expected, result) do {             \
-  if (result <= expected)                            \
+#define EXPECT_GT(max, min) do {                     \
+  if (min >= max)                                    \
+    TEST_FAILED();                                   \
+} while (0)
+
+#define EXPECT_GTE(max, min) do {                    \
+  if (min > max)                                     \
+    TEST_FAILED();                                   \
+} while (0)
+
+#define EXPECT_LT(min, max) do {                     \
+  if (max <= min)                                    \
+    TEST_FAILED();                                   \
+} while (0)
+
+#define EXPECT_LTE(min, max) do {                    \
+  if (max < min)                                     \
     TEST_FAILED();                                   \
 } while (0)
 
