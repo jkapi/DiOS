@@ -10,7 +10,7 @@
 
 typedef struct meta_alloc_t {
 	size_t size;
-	alloct_t* next;
+	struct meta_alloc_t* next;
 	uint16_t checksum;
 } meta_alloc_t;
 
@@ -27,8 +27,7 @@ void kfree(void* ptr);
 meta_alloc_t* split_block(meta_alloc_t* to_split, size_t bytes);
 
 void request_memory(void* addr);
-void set_metadata(void* addr, size_t bytes);
-
-meta_alloc_t get_metadata(void* ptr);
+meta_alloc_t* get_metadata(void* addr);
+meta_alloc_t* add_metadata(void* addr, size_t bytes);
 
 #endif  // _LIBK_HEAP_

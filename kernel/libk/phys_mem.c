@@ -63,7 +63,7 @@ int find_free_blocks(uint32_t count) {
 }
 
 // Functions to manage a single block in memory
-void* alloc_block() {
+physical_addr alloc_block() {
   if (total_blocks_ - used_blocks_ <= 0) {
     return 0;
   }
@@ -76,26 +76,24 @@ void* alloc_block() {
   map_set(free_block);
   uint32_t addr = free_block * PHYS_BLOCK_SIZE;
   used_blocks_++;
-  return (void*) addr;
+  return addr;
 }
 
-void free_block(void* p) {
-  uint32_t addr = (uint32_t) p;
+void free_block(physical_addr addr) {
   int block = addr / PHYS_BLOCK_SIZE;
  
   map_unset(block);
   used_blocks_--;
 }
 
-bool is_alloced(void* p) {
-  uint32_t addr = (uint32_t) p;
+bool is_alloced(physical_addr addr) {
   int block = addr / PHYS_BLOCK_SIZE;
   return map_test(block);
 }
 
 // Functions to allocate multiple blocks of memory
 
-void* alloc_blocks(uint32_t count) {
+physical_addr alloc_blocks(uint32_t count) {
   if (total_blocks_ - used_blocks_ <= 0) {
     return 0;
   }
@@ -111,11 +109,10 @@ void* alloc_blocks(uint32_t count) {
 
   uint32_t addr = free_block * PHYS_BLOCK_SIZE;
   used_blocks_ += count;
-  return (void*) addr;
+  return addr;
 }
 
-void free_blocks(void* p, uint32_t count) {
-  uint32_t addr = (uint32_t) p;
+void free_blocks(physical_addr addr, uint32_t count) {
   int block = addr / PHYS_BLOCK_SIZE;
 
   for (uint32_t i = 0; i < count; i++)
@@ -165,7 +162,7 @@ void phys_memory_init(struct multiboot_info* mb) {
   used_blocks_ = total_blocks_;
   phys_memory_map_ = (uint32_t*) KERNEL_END_PADDR;
   memset(phys_memory_map_, 0xFF, total_blocks_ / PHYS_BLOCKS_PER_BYTE);
-  printf("Total blocks: %d\n", total_blocks_);
+  printf("Total blocks: %ld\n", total_blocks_);
 
   // Frees memory GRUB considers available
   free_available_memory(mb);
@@ -175,12 +172,13 @@ void phys_memory_init(struct multiboot_info* mb) {
 
   // We also need to allocate the memory used by the Physical Map itself
   allocate_chunk(*phys_memory_map_, total_blocks_);
-  kernel_phys_map_start = phys_memory_map_;
-  kernel_phys_map_end = phys_memory_map_ + total_blocks_ / PHYS_BLOCKS_PER_BYTE;
-  printf("PhysMem Manager installed. Mem Map start: %x, end: %x\n",
-    phys_memory_map_, kernel_phys_map_end);
+  kernel_phys_map_start = (uint32_t) phys_memory_map_;
+  kernel_phys_map_end = kernel_phys_map_start + (
+    total_blocks_ / PHYS_BLOCKS_PER_BYTE);
+  printf("PhysMem Manager installed. Mem Map start: %lx, end: %lx\n",
+    kernel_phys_map_start, kernel_phys_map_end);
 }
 
-void update_map_addr(uint32_t* addr) {
-  phys_memory_map_ = addr;
+void update_map_addr(physical_addr addr) {
+  phys_memory_map_ = (uint32_t*) addr;
 }

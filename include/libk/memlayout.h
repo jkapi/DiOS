@@ -20,6 +20,7 @@
 #define PHYS_BLOCK_SIZE 4096
 
 // Constants to the Virtual Memory Manager
+#define TEMPORARY_TABLE_ADDR (void*) 0xC03FF000
 #define PAGES_PER_TABLE 1024
 #define PAGES_PER_DIR 1024
 #define PAGE_SIZE 4096

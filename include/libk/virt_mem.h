@@ -38,9 +38,9 @@ inline pd_entry* pdirectory_lookup_entry(page_directory* directory,
   return 0;
 }
 
-bool alloc_page(void* virtual_addr);
-void free_page(void* virtual_addr);
-void map_page(void* physical_addr, void* virtual_addr);
+bool alloc_page(virtual_addr addr);
+void free_page(virtual_addr addr);
+void map_page(physical_addr, virtual_addr);
 uint32_t virt_to_phys(virtual_addr addr);
 
 void virt_memory_init();

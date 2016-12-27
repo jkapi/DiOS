@@ -12,6 +12,7 @@
 #include <arch/i386/irq.h>
 #include <arch/i386/isrs.h>
 #include <arch/i386/tty.h>
+#include <libk/heap.h>
 #include <libk/phys_mem.h>
 #include <libk/virt_mem.h>
 #include <test/macros_test.h>
@@ -37,8 +38,8 @@ void kernel_early(struct multiboot_info* mb) {
 void kernel_main(void) {
   printf("Hello, kernel World %d!\n", 25);
   int a = 10;
-  printf("%lx \n", &a);
-  printf("aia %lx\n", virt_to_phys(&a));
+  printf("%lx \n", (uint32_t) &a);
+  printf("aia %lx\n", virt_to_phys((virtual_addr) &a));
   for(;;) {
     asm("hlt");
   }
