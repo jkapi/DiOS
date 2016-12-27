@@ -14,7 +14,8 @@ Progress
 - Physical Memory Manager setup
 - Virtual Memory Manager setup
 - Higher Half Kernel setup
-- Basic testing framework setup
+- Testing framework setup
+- Kernel heap setup (not fully tested)
 
 Under Construction
 ------------------
@@ -36,11 +37,11 @@ setting up your kernel.
 
 [Brokenthorn's OS Development Series][3] was a valuable source to get started
 with Physical and Virtual Memory management. But the hacky way they deal with
-Higher Half Kernels drove me away from it a bit.
+Higher Half Kernels and the messy approach to VMM drove me away from it a bit.
 
 I'll try to use [The little book about OS development][4] as a general guide
 from now on. It is cleaner, more updated and well-writen than the other sources
-I've used up to this point.
+I've used up to this point. It also leave things more open for the programmer.
 
 [0]:http://wiki.osdev.org/
 [1]:http://wiki.osdev.org/User:Sortie/Meaty_Skeleton

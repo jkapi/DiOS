@@ -1,34 +1,35 @@
 #include <test/unit.h>
 #include <test/macros_test.h>
 
+NEW_SUITE(MacrosTest, 5);
+
 TEST(BaseMacroTest) {
-  return 0;
+  PASS();
 }
 
 TEST(ExpectEqTest) {
-  EXPECT_EQ("Should be equal", 5, 5);
-  return 0;
+  EXPECT_EQ(5, 5);
+  PASS();
 }
 
 TEST(ExpectEqTestFail) {
-  EXPECT_EQ("Should be different", 5, 8);
-  return 0;
+  EXPECT_EQ(5, 8);
+  PASS();
 }
 
 TEST(ExpectTrue) {
-  EXPECT_TRUE("Should be true", 5);
-  return 0;
+  EXPECT_TRUE(5);
+  PASS();
 }
 
 TEST(ExpectTrueFails) {
-  EXPECT_TRUE("Should be false", 0);
-  return 0;
+  EXPECT_TRUE(0);
+  PASS();
 }
 
+END_SUITE();
+
 void test_macros() {
-  fn_ptr tests[5] = {BaseMacroTest, ExpectEqTest, ExpectEqTestFail,
-    ExpectTrue, ExpectTrueFails};
-  // This is the only test suite in the OS that should have failing tests
-  RUN_TESTS(tests, 5);
+  RUN_SUITE(MacrosTest);
 }
 

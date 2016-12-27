@@ -1,6 +1,8 @@
 #include <libk/heap.h>
 #include <test/unit.h>
 
+SUITE(HeapTest);
+
 TEST(Malloc) {
   size_t size = sizeof(int) * 10;
   int* ptr = kmalloc(size);

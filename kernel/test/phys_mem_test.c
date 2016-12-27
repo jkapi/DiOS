@@ -1,6 +1,8 @@
 #include <test/unit.h>
 #include <libk/phys_mem.h>
 
+SUITE(PhysMemTest);
+
 TEST(AllocBlock) {
   physical_addr addr = alloc_block();
   EXPECT_TRUE("Basic allocation test/1", addr);
