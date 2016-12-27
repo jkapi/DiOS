@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <libk/memlayout.h>
 
-// Physical memory managerkernel_phys_map_start
+// Physical memory manager
 // Currently implemented using bit map based allocation
 static uint32_t* phys_memory_map_ = 0;
 static uint32_t phys_mem_size_kb_ = 0;

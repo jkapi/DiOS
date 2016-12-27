@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <libk/phys_mem.h>
+#include <libk/memlayout.h>
 
 // A Page Table Entry points to a single page stored somewhere in memory/disk
 

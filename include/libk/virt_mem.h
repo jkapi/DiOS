@@ -9,6 +9,7 @@
 
 #define PAGE_DIRECTORY_INDEX(x) (((x) >> 22) & 0x3FF)
 #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
+#define PAGE_GET_TABLE_ADDRESS(x) (*x & ~0xFFF)
 #define PAGE_GET_PHYSICAL_ADDRESS(x) (*x & ~0xFFF)
  
 extern enable_paging(uint32_t page_dir);

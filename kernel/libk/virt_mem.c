@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <libk/paging.h>
+#include <libk/phys_mem.h>
 #include <libk/virt_mem.h>
 
 bool alloc_page(virtual_addr vaddr) {
@@ -7,7 +9,6 @@ bool alloc_page(virtual_addr vaddr) {
   if (!paddr) {
     return false;
   }
-
   map_page(paddr, vaddr);
   return true;
 }
@@ -48,11 +49,11 @@ void map_page(physical_addr paddr, virtual_addr vaddr) {
     // Maps the Page Directory Entry to the new table
     pd_entry_add_attrib(entry, I86_PDE_PRESENT);
     pd_entry_add_attrib(entry, I86_PDE_WRITABLE);
-    pd_entry_set_frame(entry, 0xC03FF000);
+    pd_entry_set_frame(entry, table);
   }
 
   // Get table address from entry, guaranteed to be set now
-  page_table* table = (page_table*) PAGE_GET_PHYSICAL_ADDRESS(entry);
+  page_table* table = (page_table*) PAGE_GET_TABLE_ADDRESS(entry);
 
   // Get page table entry
   pt_entry* page = ptable_lookup_entry(table, vaddr);
@@ -60,16 +61,16 @@ void map_page(physical_addr paddr, virtual_addr vaddr) {
   // Maps the Page Table Entry to the given physical address
   pt_entry_set_frame(page, paddr);
   pt_entry_add_attrib(page, I86_PTE_PRESENT);
+  pt_entry_add_attrib(page, I86_PTE_WRITABLE);
+  flush_tlb_entry(vaddr);
 }
 
 uint32_t virt_to_phys(virtual_addr addr) {
   pd_entry* pd_entry = pdirectory_lookup_entry(cur_directory, addr);
   if (!pd_entry)
     return -1;
-
-  page_table* table = (page_table*) PAGE_GET_PHYSICAL_ADDRESS(pd_entry);
+  page_table* table = (page_table*) PAGE_GET_TABLE_ADDRESS(pd_entry);
   pt_entry* pt_entry = ptable_lookup_entry(table, addr);
-
   return PAGE_GET_PHYSICAL_ADDRESS(pt_entry);
 }
 
