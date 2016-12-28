@@ -18,6 +18,7 @@
 #include <test/heap_test.h>
 #include <test/macros_test.h>
 #include <test/phys_mem_test.h>
+#include <test/vector_test.h>
 
 void kernel_early(struct multiboot_info* mb) {
   terminal_initialize();
@@ -32,6 +33,7 @@ void kernel_early(struct multiboot_info* mb) {
   test_macros();
   test_phys_mem();
   test_heap();
+  test_vector();
 
   timer_install();
   keyboard_install();

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#if defined(__is_myos_kernel)
+#if defined(__is_dios_kernel)
 #include <arch/i386/tty.h>
 #endif
 
