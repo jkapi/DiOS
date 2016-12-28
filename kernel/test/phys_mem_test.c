@@ -7,14 +7,12 @@ TEST(AllocBlock) {
   physical_addr addr = alloc_block();
   EXPECT_TRUE(addr);
   EXPECT_TRUE(is_alloced(addr));
-  PASS();
 }
 
 TEST(FreeBlock) {
   physical_addr addr = alloc_block();
   free_block(addr);
   EXPECT_FALSE(is_alloced(addr));  
-  PASS();
 }
 
 TEST(FreeAndAllocSameBlock) {
@@ -24,7 +22,6 @@ TEST(FreeAndAllocSameBlock) {
   physical_addr second_addr = alloc_block();
   EXPECT_TRUE(is_alloced(second_addr));  
   EXPECT_EQ(first_addr, second_addr);
-  PASS();
 }
 
 TEST(AllocBlocks) {
@@ -33,7 +30,6 @@ TEST(AllocBlocks) {
   for (int i = 0; i < 5; i++) {
     EXPECT_TRUE(is_alloced(first_block + (PHYS_BLOCK_SIZE * i)));
   }
-  PASS();
 }
 
 TEST(FreeBlocks) {
@@ -45,7 +41,6 @@ TEST(FreeBlocks) {
   for (int i = 0; i < 5; i++) {
     EXPECT_FALSE(is_alloced(first_block + (PHYS_BLOCK_SIZE * i)));
   }
-  PASS();
 }
 
 TEST(AllocTenFreeMiddleAndReallocMiddle) {
@@ -62,7 +57,6 @@ TEST(AllocTenFreeMiddleAndReallocMiddle) {
     EXPECT_EQ(new_alloc + (PHYS_BLOCK_SIZE * i),
       fifth_block + (PHYS_BLOCK_SIZE * i));
   }
-  PASS();
 }
 
 TEST(AllocTenFreeMiddleAndReallocEnd) {
@@ -77,7 +71,6 @@ TEST(AllocTenFreeMiddleAndReallocEnd) {
   for (int i = 0; i < 3; i++) {
     EXPECT_TRUE(is_alloced(new_alloc + (PHYS_BLOCK_SIZE * i)));
   }
-  PASS();
 }
 
 END_SUITE();

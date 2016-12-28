@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef int (*fn_ptr)();
+typedef void (*fn_ptr)();
 
 typedef struct test_info_t {
   char* name;
@@ -21,8 +21,10 @@ typedef struct test_info_t {
 #define END_SUITE()                                  \
   size_t failed_tests = 0;                           \
   for (size_t i = 0; i < test_count; i++) {          \
+    bool passed = true;                              \
     test_info_t* cur_test = &tests[i];               \
-    if (cur_test->fn(cur_test) == -1) {              \
+    cur_test->fn(cur_test, &passed);                 \
+    if (!passed) {                                   \
       failed_tests++;                                \
     }                                                \
   }                                                  \
@@ -42,20 +44,16 @@ typedef struct test_info_t {
 } while (0)
 
 #define TEST(fn_name)                                \
-  auto int fn_name(test_info_t*);                    \
+  auto void fn_name(test_info_t*, bool* passed);     \
   tests[test_count].name = #fn_name;                 \
   tests[test_count++].fn = fn_name;                  \
-  int fn_name(test_info_t* info)                     \
+  void fn_name(test_info_t* info, bool* passed)      \
 
 #define TEST_FAILED() {                              \
   printf("Test failed - %s. Found at %s:%d\n",       \
       info->name, __FILE__, __LINE__);               \
-  return -1;                                         \
+  *passed = false;                                   \
 }                                                    
-
-#define PASS() do {                                  \
-  return 0;                                          \
-} while (0)
 
 #define EXPECT_EQ(expected, result) do {             \
   if (expected != result)                            \

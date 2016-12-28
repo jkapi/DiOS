@@ -1,7 +1,7 @@
 #include <libk/heap.h>
 #include <test/unit.h>
 
-NEW_SUITE(HeapTest, 10);
+NEW_SUITE(HeapTest, 7);
 
 extern free_list_t free_list_;
 
@@ -17,7 +17,6 @@ TEST(Malloc) {
   EXPECT_EQ(metadata->size, size);
   EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
   EXPECT_EQ(metadata->next, NULL);
-  PASS();
 
   // Clean-up
   kfree(ptr);
@@ -25,7 +24,6 @@ TEST(Malloc) {
 
 TEST(FreeNull) {
   kfree(NULL);
-  PASS();
 }
 
 TEST(FreeNotMallocedDoesntWork) {
@@ -39,7 +37,6 @@ TEST(FreeNotMallocedDoesntWork) {
   EXPECT_EQ(metadata->size, 1);
   EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
   EXPECT_EQ(metadata->next, NULL);
-  PASS();
 
   // Clean-up
   kfree(ptr);
@@ -52,7 +49,6 @@ TEST(FreeMalloced) {
   EXPECT_EQ(metadata->size, 25);
   EXPECT_NE(metadata->checksum, MALLOCED_CHECKSUM);
   EXPECT_NE(metadata->next, NULL);
-  PASS();
 }
 
 TEST(FreeListCorrectlyPopulated) {
@@ -71,7 +67,6 @@ TEST(FreeListCorrectlyPopulated) {
     EXPECT_NE(cur_metadata->next, NULL);
     cur_metadata = cur_metadata->next;
   }
-  PASS();
 }
 
 TEST(SplittingBlockOfMemory) {

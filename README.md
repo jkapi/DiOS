@@ -15,14 +15,21 @@ Progress
 - Virtual Memory Manager setup
 - Higher Half Kernel setup
 - Testing framework setup
-- Kernel heap setup (not fully tested)
+- Kernel heap setup
 
 Under Construction
 ------------------
 
-- Tests for Paging
+- Basic shell to allow manual test runs, print OS info, etc
 - Exploring user mode
 - Organizing the file structure that's already a mess somehow (ongoing effort)
+
+Planned
+---------
+
+- Basic data structures: array_list, linked_list
+- Better Kernel heap: consolidate free blocks into larger ones
+- Improve testing framework: print errors, use heap, etc...
 
 Resources
 ---------
@@ -52,4 +59,4 @@ I've used up to this point. It also leave things more open for the programmer.
 Installing
 ----------
 
-I'll write this soon
+I'll write this soon. One day, I'm sure.
