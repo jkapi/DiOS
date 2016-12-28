@@ -21,9 +21,8 @@ void print_free_list(free_list_t* free_list) {
 }
 
 bool can_be_split(size_t block_size, size_t requested_bytes) {
-	// A block can be split if it's bigger than the space needed
-	// for another metadata and it's bytes, and there's still space
-	// left in the original block
+	// A block can be split if it has the space needed for another metadata block
+	// and the requested bytes and there's still space left in the original block
 	return block_size > META_ALLOC_SIZE + requested_bytes;
 }
 
@@ -33,10 +32,9 @@ void* kmalloc(size_t bytes) {
 		return NULL;
 	}
 
-	print_free_list(&free_list_);
-
 	// Find the first block that can fit our requested memory
 	meta_alloc_t* free_block = first_free_block(&free_list_, bytes);
+	
 	// If we can't find a block, request 4KB to the heap and retry
 	if (!free_block) {
 		free_list_.head = (meta_alloc_t*) cur_heap_addr_;

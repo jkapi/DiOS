@@ -16,22 +16,21 @@
 //
 // e.g. GENERATE_VECTOR(int) will generate the functions:
 //
-//      static int_vector* new_int_vector(uint32_t capacity);
+//      static int_vector* new_int_vector();
 //      static void push_int_vector(int_vector* vector, int value);
 //      static void pop_int_vector(int_vector* vector, int value);
 //      static void delete_int_vector(int_vector* vector);
 //
 //      GENERATE_VECTOR_PTR(char) will generate the functions:
 //
-//      static char_ptr_vector* new_char_ptr_vector(
-//        uint32_t capacity, bool own_ptrs);
+//      static char_ptr_vector* new_char_ptr_vector(bool own_ptrs);
 //      static void push_char_ptr_vector(char_ptr_vector* vector, int value);
 //      static void pop_char_ptr_vector(char_ptr_vector* vector, int value);
 //      static void delete_char_ptr_vector(char_ptr_vector* vector);
 //
 // Given the verbosity of these functions, there are macros to make life easier
 // 
-// e.g. int_vector* my_vector = new_int_vector(10);
+// e.g. int_vector* my_vector = new_int_vector();
 //      push(my_vector, 1);  - calls push_int_vector
 //      pop(my_vector)       - calls pop_int_vector
 //      delete(my_vector)    - calls delete_int_vector
@@ -41,7 +40,7 @@
 //
 // Notice that for Vectors of pointers, the new function takes a second
 // parameter own_ptrs. If true, the vector will own the given pointers,
-// being responsible for deleteing them when the vector is deleted.
+// being responsible for deleting them when the vector is deleted.
 
 typedef struct vector {
   uint32_t size;
