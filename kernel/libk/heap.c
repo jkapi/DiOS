@@ -48,6 +48,8 @@ void* kmalloc(size_t bytes) {
 	if (can_be_split(alloced_ptr->size, bytes)) {
 		alloced_ptr = split_block(free_block, bytes, &free_list_);
 	}
+
+	increase_memory_tracker(alloced_ptr);
 	return alloced_ptr + 1; 
 }
 
@@ -67,6 +69,7 @@ void kfree(void* ptr) {
 	metadata->checksum = 0;
 	metadata->next = free_list_.head;
 	free_list_.head = metadata;
+	decrease_memory_tracker(metadata);
 }
 
 meta_alloc_t* first_free_block(free_list_t* free_list, size_t bytes) {

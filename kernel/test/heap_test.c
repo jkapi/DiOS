@@ -5,9 +5,9 @@ NEW_SUITE(HeapTest, 7);
 
 extern free_list_t free_list_;
 
-// TEST(EmptyMalloc) {
-//   EXPECT_EQ(NULL, kmalloc(0));
-// }
+TEST(EmptyMalloc) {
+  EXPECT_EQ(NULL, kmalloc(0));
+}
 
 TEST(Malloc) {
   size_t size = sizeof(int) * 10;
@@ -22,9 +22,9 @@ TEST(Malloc) {
   kfree(ptr);
 }
 
-// TEST(FreeNull) {
-//   kfree(NULL);
-// }
+TEST(FreeNull) {
+  kfree(NULL);
+}
 
 TEST(FreeNotMallocedDoesntWork) {
   // TODO(psamora) When we add abort,  figure out how to test this

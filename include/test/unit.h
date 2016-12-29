@@ -1,3 +1,4 @@
+#include <libk/heap.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -12,30 +13,36 @@ typedef struct test_info_t {
 } test_info_t;
 
 // Defines macros for testing
-#define NEW_SUITE(suite_name, max_num_tests)         \
-  void suite_name##_run() {                          \
-    char* name = #suite_name;                        \
-    test_info_t tests[max_num_tests];                \
-    size_t test_count = 0;                           \
+#define NEW_SUITE(suite_name, max_num_tests)                                   \
+  void suite_name##_run() {                                                    \
+    char* name = #suite_name;                                                  \
+    test_info_t tests[max_num_tests];                                          \
+    size_t test_count = 0;                                                     \
 
-#define END_SUITE()                                  \
-  size_t failed_tests = 0;                           \
-  for (size_t i = 0; i < test_count; i++) {          \
-    bool passed = true;                              \
-    test_info_t* cur_test = &tests[i];               \
-    cur_test->fn(cur_test, &passed);                 \
-    if (!passed) {                                   \
-      failed_tests++;                                \
-    }                                                \
-  }                                                  \
-  if (failed_tests == 0) {                           \
-    printf("Test suite %s passed! %d/%d\n", name,    \
-      test_count, test_count);                       \
-  } else {                                           \
-    printf("Test suite %s failed! %d/%d passed\n",   \
-      name, test_count - failed_tests, test_count);  \    
-  }                                                  \
-}                                                    \
+#define END_SUITE()                                                            \
+  size_t failed_tests = 0;                                                     \
+  for (size_t i = 0; i < test_count; i++) {                                    \
+    bool passed = true;                                                        \
+    test_info_t* cur_test = &tests[i];                                         \
+    unsigned long memory_counter = 0;                                          \
+    track_memory_malloced(&memory_counter);                                    \
+    cur_test->fn(cur_test, &passed);                                           \
+    if (!passed) {                                                             \
+      failed_tests++;                                                          \
+    }                                                                          \
+    untrack_memory_malloced(&memory_counter);                                  \
+    if (memory_counter > 0) {                                                  \
+      printf("Test %s had memory leaks. %d blocks not freed\n.",               \
+        cur_test->name, memory_counter);                                       \      
+    }                                                                          \
+  }                                                                            \
+  if (failed_tests == 0) {                                                     \
+    printf("Test suite %s passed! %d/%d\n", name, test_count, test_count);     \
+  } else {                                                                     \
+    printf("Test suite %s failed! %d/%d passed\n",                             \
+      name, test_count - failed_tests, test_count);                            \    
+  }                                                                            \
+}                                                                              \
 
 #define RUN_SUITE(suite_name) do {                   \
   printf("Running suite " #suite_name "...\n");      \

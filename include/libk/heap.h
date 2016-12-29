@@ -27,6 +27,29 @@ virtual_addr cur_heap_addr_;
 void* kmalloc(size_t size);
 void kfree(void* ptr);
 
+// These are two functions use to compute memory leaks. 
+// Pass in the pointer to the counter to be used to track the leaks.
+// While that counter is set, it will be populated with the malloced/freed bytes
+// Once the tracking is done, the user MUST call untrack_memory_malloced
+static unsigned long* memory_tracker_counter_ = NULL;
+
+static void track_memory_malloced(unsigned long* counter) {
+  memory_tracker_counter_ = counter;
+}
+static void untrack_memory_malloced() {
+  memory_tracker_counter_ = NULL;
+}
+
+static void increase_memory_tracker(meta_alloc_t* block) {
+  if (memory_tracker_counter_)
+    memory_tracker_counter_ += block->size;
+}
+
+static void decrease_memory_tracker(meta_alloc_t* block) {
+  if (memory_tracker_counter_)
+    memory_tracker_counter_ -= block->size;
+}
+
 // Find the first free block that can fit the given size, NULL otherwise
 // The block is removed from the given list
 meta_alloc_t* first_free_block(free_list_t* free_list, size_t bytes);
