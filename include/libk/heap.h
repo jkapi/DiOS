@@ -11,10 +11,24 @@
 
 #define META_ALLOC_SIZE sizeof(meta_alloc_t)
 
+typedef struct new_meta_alloc_t {
+  // If set to 0x12345678, this block is alloced for the heap
+  size_t checksum;
+  // Number of available heap blocks. This doesn't guarantee that
+  // this number of blocks are available in sequence.
+  size_t available_blocks;
+  // bitmap: 1 represents an alloc block, 0 a free block
+	unsigned char alloced_block_bitmap[HEAP_BLOCK_BIT_MAP_SIZE];
+  // bitmap: 1 represents the starting block of an allocation, else 0
+  unsigned char first_alloced_bitmap[HEAP_BLOCK_BIT_MAP_SIZE];
+  // Actual memory being referenced by the bitmaps
+  unsigned char alloc_memory[HEAP_BLOCK_COUNT * HEAP_BLOCK_SIZE];
+} new_meta_alloc_t;
+
 typedef struct meta_alloc_t {
-	size_t size;
-	struct meta_alloc_t* next;
-	uint16_t checksum;
+  size_t size;
+  struct meta_alloc_t* next;
+  uint16_t checksum;
 } meta_alloc_t;
 
 typedef struct free_list_t {

@@ -29,6 +29,10 @@
 #define HEAP_VIRT_ADDR_START 0xC0500000 // if kernel size > 4MB, change
 #define HEAP_INITIAL_BLOCK_SIZE 128
 
+#define HEAP_BLOCK_SIZE 16 // bytes
+#define HEAP_BLOCK_BIT_MAP_SIZE 32 // 32 bytes can represent 256 blocks
+#define HEAP_BLOCK_COUNT 250 // amount of blocks we can fit beside the bitmap
+
 // Functions to
 #define ALIGN_BLOCK(addr) (addr) - ((addr) % PHYS_BLOCK_SIZE);
 
