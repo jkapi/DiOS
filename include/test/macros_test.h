@@ -3,4 +3,4 @@
 
 void test_macros();
 
-#endif // _TEST_MACROS_TEST_
+#endif  // _TEST_MACROS_TEST_

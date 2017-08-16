@@ -3,4 +3,4 @@
 
 void test_phys_mem();
 
-#endif // _TEST_PHYS_MEM_TEST_
+#endif  // _TEST_PHYS_MEM_TEST_

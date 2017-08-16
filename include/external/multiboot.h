@@ -1,5 +1,4 @@
 /*  multiboot.h - Multiboot header file.  */
-
 /*  Copyright (C) 1999,2003,2007,2008,2009,2010  Free Software Foundation, Inc.
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -15,11 +14,9 @@
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL ANY
- *  DEVELOPER OR DISTRIBUTOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *LIABILITY,
+ *  DEVELOPER OR DISTRIBUTOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
  *  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
- *  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *SOFTWARE.
+ *  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef MULTIBOOT_HEADER
@@ -59,13 +56,10 @@
 
 /* is there basic lower/upper memory information? */
 #define MULTIBOOT_INFO_MEMORY     0x00000001
-
 /* is there a boot device set? */
 #define MULTIBOOT_INFO_BOOTDEV      0x00000002
-
 /* is the command-line defined? */
 #define MULTIBOOT_INFO_CMDLINE      0x00000004
-
 /* are there modules to do something with? */
 #define MULTIBOOT_INFO_MODS     0x00000008
 
@@ -73,7 +67,6 @@
 
 /* is there a symbol table loaded? */
 #define MULTIBOOT_INFO_AOUT_SYMS    0x00000010
-
 /* is there an ELF section header table? */
 #define MULTIBOOT_INFO_ELF_SHDR     0X00000020
 
@@ -146,8 +139,7 @@ struct multiboot_elf_section_header_table
   multiboot_uint32_t addr;
   multiboot_uint32_t shndx;
 };
-typedef struct multiboot_elf_section_header_table
-multiboot_elf_section_header_table_t;
+typedef struct multiboot_elf_section_header_table multiboot_elf_section_header_table_t;
 
 struct multiboot_info
 {
@@ -204,9 +196,9 @@ struct multiboot_info
   multiboot_uint32_t framebuffer_width;
   multiboot_uint32_t framebuffer_height;
   multiboot_uint8_t framebuffer_bpp;
-# define MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED 0
-# define MULTIBOOT_FRAMEBUFFER_TYPE_RGB     1
-# define MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT 2
+#define MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED 0
+#define MULTIBOOT_FRAMEBUFFER_TYPE_RGB     1
+#define MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT 2
   multiboot_uint8_t framebuffer_type;
   union
   {
@@ -240,11 +232,11 @@ struct multiboot_mmap_entry
   multiboot_uint32_t size;
   multiboot_uint64_t addr;
   multiboot_uint64_t len;
-# define MULTIBOOT_MEMORY_AVAILABLE    1
-# define MULTIBOOT_MEMORY_RESERVED   2
-# define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
-# define MULTIBOOT_MEMORY_NVS                    4
-# define MULTIBOOT_MEMORY_BADRAM                 5
+#define MULTIBOOT_MEMORY_AVAILABLE    1
+#define MULTIBOOT_MEMORY_RESERVED   2
+#define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
+#define MULTIBOOT_MEMORY_NVS                    4
+#define MULTIBOOT_MEMORY_BADRAM                 5
   multiboot_uint32_t type;
 } __attribute__((packed));
 typedef struct multiboot_mmap_entry multiboot_memory_map_t;

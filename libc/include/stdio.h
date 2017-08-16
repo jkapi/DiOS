@@ -5,15 +5,14 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif // ifdef __cplusplus
+#endif
 
-int printf(const char* __restrict,
-           ...);
+int printf(const char* __restrict, ...);
 int putchar(int);
 int puts(const char*);
 
 #ifdef __cplusplus
 }
-#endif // ifdef __cplusplus
+#endif
 
-#endif // ifndef _STDIO_H
+#endif

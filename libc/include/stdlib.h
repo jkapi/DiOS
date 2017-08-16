@@ -5,13 +5,13 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif // ifdef __cplusplus
+#endif
 
 __attribute__((__noreturn__))
 void abort(void);
 
 #ifdef __cplusplus
 }
-#endif // ifdef __cplusplus
+#endif
 
-#endif // ifndef _STDLIB_H
+#endif

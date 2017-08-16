@@ -8,55 +8,55 @@ typedef enum {
   SHORT,
   DEFAULT,
   LONG,
-  LONG_LONG
-} length_specifier;
+  LONG_LONG} length_specifier;
 
-#define print_num(__type, __base, __num) {                       \
-    if (__num == 0) {                                            \
-      return putchar('0');                                       \
-    }                                                            \
-    char buffer[20];                                             \
-    int  count = 0;                                              \
-    while (num != 0) {                                           \
-      buffer[count++] = digits[num % __base];                    \
-      num /= base;                                               \
-    }                                                            \
-    for (size_t i = count; i != 0; i--) putchar(buffer[i - 1]);  \
+#define print_num(__type, __base, __num) {             \
+  if (__num == 0) {                                    \
+    return putchar('0');                               \
+  }                                                    \
+  char buffer[20];                                     \
+  int count = 0;                                       \
+  while (num != 0) {                                   \
+    buffer[count++] = digits[num % __base];            \
+    num /= base;                                       \
+  }                                                    \
+  for (size_t i = count; i != 0; i--)                  \
+    putchar(buffer[i - 1]);                            \
 }
 
-#define print_short(__type, __base, __parameters) { \
-    __type num = va_arg(__parameters, int);         \
-    if (num < 0) {                                  \
-      putchar('-');                                 \
-      num *= -1;                                    \
-    }                                               \
-    print_num(__type, __base, num);                 \
-}
+#define print_short(__type, __base, __parameters) {    \
+  __type num = va_arg(__parameters, int);              \
+  if (num < 0) {                                       \
+    putchar('-');                                      \
+    num *= -1;                                         \
+  }                                                    \
+  print_num(__type, __base, num);                      \
+};
 
-#define print_ushort(__type, __base, __parameters) { \
-    __type num = va_arg(__parameters, int);          \
-    print_num(__type, __base, num);                  \
-}
+#define print_ushort(__type, __base, __parameters) {   \
+  __type num = va_arg(__parameters, int);              \
+  print_num(__type, __base, num);                      \
+};
 
-#define print_int(__type, __base, __parameters) { \
-    __type num = va_arg(__parameters, __type);    \
-    if (num < 0) {                                \
-      putchar('-');                               \
-      num *= -1;                                  \
-    }                                             \
-    print_num(__type, __base, num);               \
-}
+#define print_int(__type, __base, __parameters) {      \
+  __type num = va_arg(__parameters, __type);           \
+  if (num < 0) {                                       \
+    putchar('-');                                      \
+    num *= -1;                                         \
+  }                                                    \
+  print_num(__type, __base, num);                      \
+};
 
-#define print_uint(__type, __base, __parameters) { \
-    __type num = va_arg(__parameters, __type);     \
-    print_num(__type, __base, num);                \
-}
+#define print_uint(__type, __base, __parameters) {     \
+  __type num = va_arg(__parameters, __type);           \
+  print_num(__type, __base, num);                      \
+};
 
 const char digits[] = "0123456789abcdef";
 
 static void print(const char* data, size_t data_length) {
-  for (size_t i = 0; i < data_length;
-       i++) putchar((int) ((const unsigned char*) data)[i]);
+  for (size_t i = 0; i < data_length; i++)
+    putchar((int) ((const unsigned char*) data)[i]);
 }
 
 int printf(const char* restrict format, ...) {
@@ -64,10 +64,9 @@ int printf(const char* restrict format, ...) {
   length_specifier length;
   bool is_signed;
   bool is_number;
-  int  base;
+  int base;
 
   va_list parameters;
-
   va_start(parameters, format);
 
   int written = 0;
@@ -94,135 +93,111 @@ int printf(const char* restrict format, ...) {
 
     // Deals with the length specifiers
     switch (cur_specifier) {
-    case 'l':
-      ++format;
-
-      if (*format == 'l') {
-        length = LONG_LONG;
+      case 'l':
         ++format;
-      }
-      else length = LONG;
-      break;
-
-    case 'h':
-
-      if (*(format + 1) == 'l') {
-        length = SHORT_SHORT;
-        ++format;
-      }
-      else length = SHORT;
-      break;
+        if (*format == 'l') {
+          length = LONG_LONG;
+          ++format;
+        }
+        else
+          length = LONG;
+        break;
+      case 'h':
+        if (*(format + 1) == 'l') {
+          length = SHORT_SHORT;
+          ++format;
+        }
+        else
+          length = SHORT;
+        break;
     }
 
     cur_specifier = *format;
 
     // Deals with the general specifiers
     switch (cur_specifier) {
-    case 'c':;
-      const char c = (char) va_arg(parameters, int /* char promotes to int */);
-      print(&c, 1);
-      is_number = false;
-      break;
-
-    case 's':;
-      const char* s = va_arg(parameters, const char*);
-      print(s, strlen(s));
-      is_number = false;
-      break;
-
-    case 'd':
-    case 'i':;
-
-      // default values is_signed and base
-      break;
-
-    case 'f':
-    case 'F':
-      break;
-
-    case 'u':
-      is_signed = false;
-      break;
-
-    case 'o':
-      is_signed = false;
-      base = 8;
-      break;
-
-    case 'x':;
-      is_signed = false;
-      base = 16;
-      print("0x", 2);
-      break;
-
-    case 'X':
-      break;
-
-    case 'a':
-      break;
-
-    case 'A':
-      break;
-
-    case 'p':
-      break;
-
-    case 'n':
-      break;
-
-    case '%':
-      break;
-
-    default:
-      break;
+      case 'c': ;
+        const char c = (char) va_arg(parameters, int /* char promotes to int */);
+        print(&c, 1);
+        is_number = false;
+        break;
+      case 's': ;
+        const char* s = va_arg(parameters, const char*);
+        print(s, strlen(s));
+        is_number = false;
+        break;
+      case 'd':
+      case 'i': ;
+        // default values is_signed and base
+        break;
+      case 'f':
+      case 'F':
+        break;
+      case 'u':
+        is_signed = false;
+        break;
+      case 'o':
+        is_signed = false;
+        base = 8;
+        break;
+      case 'x': ;
+        is_signed = false;
+        base = 16;
+        print("0x", 2);
+        break;
+      case 'X':
+        break;
+      case 'a':
+        break;
+      case 'A':
+        break;
+      case 'p':
+        break;
+      case 'n':
+        break;
+      case '%':
+        break;
+      default:
+        break;
     }
 
     if (is_number) {
       switch (length) {
-      case SHORT_SHORT:
-
-        if (is_signed) {
-          print_short(signed char, base, parameters);
-        } else {
-          print_ushort(unsigned char, base, parameters);
-        }
-        break;
-
-      case SHORT:
-
-        if (is_signed) {
-          print_short(short int, base, parameters);
-        } else {
-          print_ushort(unsigned short int, base, parameters);
-        }
-        break;
-
-      case DEFAULT:
-
-        if (is_signed) {
-          print_int(int, base, parameters);
-        } else {
-          print_uint(unsigned int, base, parameters);
-        }
-        break;
-
-      case LONG:
-
-        if (is_signed) {
-          print_int(long int, base, parameters);
-        } else {
-          print_uint(unsigned long int, base, parameters);
-        }
-        break;
-
-      case LONG_LONG:
-
-        if (is_signed) {
-          print_int(long long int, base, parameters);
-        } else {
-          print_uint(unsigned long long int, base, parameters);
-        }
-        break;
+        case SHORT_SHORT:
+          if (is_signed) {
+            print_short(signed char, base, parameters);
+          } else {
+            print_ushort(unsigned char, base, parameters);
+          }
+          break;
+        case SHORT:
+          if (is_signed) {
+            print_short(short int, base, parameters);
+          } else {
+            print_ushort(unsigned short int, base, parameters);
+          }
+          break;
+        case DEFAULT:
+          if (is_signed) {
+            print_int(int, base, parameters);
+          } else {
+            print_uint(unsigned int, base, parameters);
+          }
+          break;
+        case LONG:
+          if (is_signed) {
+            print_int(long int, base, parameters);
+          } else {
+            print_uint(unsigned long int, base, parameters);
+          }
+          break;
+        case LONG_LONG:
+          if (is_signed) {
+            print_int(long long int, base, parameters);
+          } else {
+            print_uint(unsigned long long int, base, parameters);
+          }
+          break;
       }
     }
 

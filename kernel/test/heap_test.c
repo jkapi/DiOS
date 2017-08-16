@@ -11,13 +11,12 @@ TEST(EmptyMalloc) {
 
 TEST(Malloc) {
   size_t size = sizeof(int) * 10;
-  int  * ptr = kmalloc(size);
+  int* ptr = kmalloc(size);
 
   meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
-
-  EXPECT_EQ(metadata->size,     size);
+  EXPECT_EQ(metadata->size, size);
   EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
-  EXPECT_EQ(metadata->next,     NULL);
+  EXPECT_EQ(metadata->next, NULL);
 
   // Clean-up
   kfree(ptr);
@@ -37,7 +36,7 @@ TEST(FreeNotMallocedDoesntWork) {
 
   EXPECT_GTE(metadata->size, 1);
   EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
-  EXPECT_EQ(metadata->next,     NULL);
+  EXPECT_EQ(metadata->next, NULL);
 
   // Clean-up
   kfree(ptr);
@@ -46,11 +45,10 @@ TEST(FreeNotMallocedDoesntWork) {
 TEST(FreeMalloced) {
   char* ptr = kmalloc(25);
   meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
-
   kfree(ptr);
   EXPECT_GTE(metadata->size, 25);
   EXPECT_NE(metadata->checksum, MALLOCED_CHECKSUM);
-  EXPECT_NE(metadata->next,     NULL);
+  EXPECT_NE(metadata->next, NULL);
 }
 
 TEST(FreeListCorrectlyPopulated) {
@@ -66,7 +64,7 @@ TEST(FreeListCorrectlyPopulated) {
   for (size_t i = 10; i > 9; i--) {
     EXPECT_GTE(cur_metadata->size, i);
     EXPECT_NE(cur_metadata->checksum, MALLOCED_CHECKSUM);
-    EXPECT_NE(cur_metadata->next,     NULL);
+    EXPECT_NE(cur_metadata->next, NULL);
     cur_metadata = cur_metadata->next;
   }
 }
@@ -76,7 +74,6 @@ TEST(SplittingBlockOfMemory) {
 
   // Allocate large block and free it so it is in the front of the FreeList
   char* ptr = kmalloc(large_block_size);
-
   kfree(ptr);
 
   // Allocate 10 blocks, asserting the block in the front keeps decreasing

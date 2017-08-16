@@ -3,4 +3,4 @@
 
 void keyboard_install();
 
-#endif // _KERNEL_KB_H_
+#endif  // _KERNEL_KB_H_

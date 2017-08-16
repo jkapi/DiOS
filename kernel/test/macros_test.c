@@ -3,7 +3,8 @@
 
 NEW_SUITE(MacrosTest, 5);
 
-TEST(BaseMacroTest) {}
+TEST(BaseMacroTest) {
+}
 
 TEST(ExpectEqTest) {
   EXPECT_EQ(5, 5);
@@ -26,3 +27,4 @@ END_SUITE();
 void test_macros() {
   RUN_SUITE(MacrosTest);
 }
+

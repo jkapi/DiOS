@@ -3,4 +3,4 @@
 
 void test_heap();
 
-#endif // _TEST_HEAP_TEST_
+#endif  // _TEST_HEAP_TEST_
