@@ -3,4 +3,4 @@
 
 void test_vector();
 
-#endif  // _TEST_VECTOR_TEST_
+#endif // _TEST_VECTOR_TEST_

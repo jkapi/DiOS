@@ -3,4 +3,4 @@
 
 #define __dios_libc 1
 
-#endif
+#endif // ifndef _SYS_CDEFS_H

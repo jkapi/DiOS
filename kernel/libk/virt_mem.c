@@ -6,6 +6,7 @@
 
 bool alloc_page(virtual_addr vaddr) {
   physical_addr paddr = alloc_block();
+
   if (!paddr) {
     return false;
   }
@@ -15,15 +16,16 @@ bool alloc_page(virtual_addr vaddr) {
 
 void free_page(virtual_addr addr) {
   pd_entry* pd_entry = pdirectory_lookup_entry(cur_directory, addr);
-  if (!pd_entry)
-    return;
+
+  if (!pd_entry) return;
 
   page_table* table = (page_table*) PAGE_GET_PHYSICAL_ADDRESS(pd_entry);
-  pt_entry* pt_entry = ptable_lookup_entry(table, addr);
-  if (!pt_entry)
-    return;
+  pt_entry  * pt_entry = ptable_lookup_entry(table, addr);
+
+  if (!pt_entry) return;
 
   physical_addr block = pt_entry_frame(*pt_entry);
+
   if (block) {
     free_block(block);
   }
@@ -33,11 +35,12 @@ void free_page(virtual_addr addr) {
 
 void map_page(physical_addr paddr, virtual_addr vaddr) {
   pd_entry* entry = pdirectory_lookup_entry(cur_directory, vaddr);
+
   if (!pd_entry_is_present(*entry)) {
     // Page Directory Entry not present, allocate it
     physical_addr table = alloc_block();
-    if (!table)
-      return;
+
+    if (!table) return;
 
     // Temporarily maps the new Page Table to the temporary table addr
     map_page(table, (virtual_addr) TEMPORARY_TABLE_ADDR);
@@ -67,32 +70,32 @@ void map_page(physical_addr paddr, virtual_addr vaddr) {
 
 uint32_t virt_to_phys(virtual_addr addr) {
   pd_entry* pd_entry = pdirectory_lookup_entry(cur_directory, addr);
-  if (!pd_entry)
-    return -1;
+
+  if (!pd_entry) return -1;
+
   page_table* table = (page_table*) PAGE_GET_TABLE_ADDRESS(pd_entry);
-  pt_entry* pt_entry = ptable_lookup_entry(table, addr);
+  pt_entry  * pt_entry = ptable_lookup_entry(table, addr);
   return PAGE_GET_PHYSICAL_ADDRESS(pt_entry);
 }
 
 void virt_memory_init() {
   // Allocates first MB page table
   page_table* table = (page_table*) alloc_block();
-  if (!table)
-     return;
+
+  if (!table) return;
 
   // Allocates kernel page table
   page_table* table2 = (page_table*) alloc_block();
-  if (!table2)
-    return;
+
+  if (!table2) return;
 
   // Clear allocated page tables
-  memset(table, 0, sizeof(page_table));
+  memset(table,  0, sizeof(page_table));
   memset(table2, 0, sizeof(page_table));
 
   // Maps first MB to 3GB
   for (int frame = 0x0, virt = 0xC0000000; frame < 0x100000;
-      frame += 4096, virt += 4096) {
-
+       frame += 4096, virt += 4096) {
     pt_entry page = 0;
     pt_entry_add_attrib(&page, I86_PTE_PRESENT);
     pt_entry_set_frame(&page, frame);
@@ -102,9 +105,8 @@ void virt_memory_init() {
 
   // Maps kernel pages and phys mem pages
   // TODO(psamora) What if kernel is > 4MB?
-  for (uint32_t frame = KERNEL_START_PADDR, virt = KERNEL_START_VADDR; 
-    frame < KERNEL_PHYS_MAP_END; frame += 4096, virt += 4096) {
-
+  for (uint32_t frame = KERNEL_START_PADDR, virt = KERNEL_START_VADDR;
+       frame < KERNEL_PHYS_MAP_END; frame += 4096, virt += 4096) {
     pt_entry page = 0;
     pt_entry_add_attrib(&page, I86_PTE_PRESENT);
     pt_entry_set_frame(&page, frame);
@@ -114,8 +116,8 @@ void virt_memory_init() {
 
   // Create default directory table
   cur_directory = (page_directory*) alloc_blocks(3);
-  if (!cur_directory)
-    return;
+
+  if (!cur_directory) return;
 
   memset(cur_directory, 0, sizeof(page_directory));
 

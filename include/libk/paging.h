@@ -64,7 +64,7 @@ enum PAGE_PDE_FLAGS {
   I86_PDE_LV4_GLOBAL = 0x200,
   I86_PDE_FRAME = 0x7FFFF000
 };
- 
+
 inline void pd_entry_add_attrib(pd_entry* entry, uint32_t attrib) {
   *entry |= attrib;
 }
@@ -101,4 +101,4 @@ inline void pd_entry_enable_global(pd_entry entry) {
   // TODO(psamora) Figure this out
 }
 
-#endif  // _LIBK_KPAGING_H_
+#endif // _LIBK_KPAGING_H_

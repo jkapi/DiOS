@@ -3,4 +3,4 @@
 
 void timer_install();
 
-#endif  // _KERNEL_TIMER_H_
+#endif // _KERNEL_TIMER_H_

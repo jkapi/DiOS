@@ -11,7 +11,7 @@
 #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
 #define PAGE_GET_TABLE_ADDRESS(x) (*x & ~0xFFF)
 #define PAGE_GET_PHYSICAL_ADDRESS(x) (*x & ~0xFFF)
- 
+
 extern enable_paging(uint32_t page_dir);
 
 // Page Directory holds 1024 page directory entries
@@ -27,27 +27,27 @@ typedef struct page_table {
 page_directory* cur_directory;
 
 inline pt_entry* ptable_lookup_entry(page_table* table, virtual_addr addr) {
-  if (table)
-    return &table->m_entries[PAGE_TABLE_INDEX(addr)];
+  if (table) return &table->m_entries[PAGE_TABLE_INDEX(addr)];
+
   return 0;
 }
 
 inline pd_entry* pdirectory_lookup_entry(page_directory* directory,
-    virtual_addr addr) {
-  if (directory)
-    return &directory->m_entries[PAGE_DIRECTORY_INDEX(addr)];
+                                         virtual_addr    addr) {
+  if (directory) return &directory->m_entries[PAGE_DIRECTORY_INDEX(addr)];
+
   return 0;
 }
 
-bool alloc_page(virtual_addr addr);
-void free_page(virtual_addr addr);
+bool        alloc_page(virtual_addr addr);
+void        free_page(virtual_addr addr);
 void map_page(physical_addr, virtual_addr);
-uint32_t virt_to_phys(virtual_addr addr);
+uint32_t    virt_to_phys(virtual_addr addr);
 
-void virt_memory_init();
+void        virt_memory_init();
 
 inline void flush_tlb_entry(virtual_addr addr) {
-  invlpg((void *) addr);
+  invlpg((void*) addr);
 }
 
-#endif  // _LIBK_KVIRT_MEM_H_
+#endif // _LIBK_KVIRT_MEM_H_

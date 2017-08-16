@@ -29,7 +29,7 @@
 //      static void delete_char_ptr_vector(char_ptr_vector* vector);
 //
 // Given the verbosity of these functions, there are macros to make life easier
-// 
+//
 // e.g. int_vector* my_vector = new_int_vector();
 //      push(my_vector, 1);  - calls push_int_vector
 //      pop(my_vector)       - calls pop_int_vector
@@ -49,99 +49,102 @@ typedef struct vector {
   void* data;
 } vector __attribute__((packed));
 
-vector* new_vector(size_t vector_size, size_t size);
-void delete_vector(vector* vector);
-void vector_resize(vector* vector);
+vector* new_vector(size_t vector_size,
+                   size_t size);
+void    delete_vector(vector* vector);
+void    vector_resize(vector* vector);
 
 #define delete(__vector) __vector->delete(__vector)
 #define push(__vector, __value) __vector->push(__vector, __value)
 #define pop(__vector) __vector->pop(__vector)
 
-#define GENERATE_VECTOR(type)                                          \
-  typedef struct type##_vector {                                       \
-    uint32_t size;                                                     \
-    uint32_t capacity;                                                 \
-    size_t data_size;                                                  \
-    type* data;                                                        \
-    void (*delete) (struct type##_vector* vector);                     \
-    void (*push) (struct type##_vector* vector, type value);           \
-    type (*pop) (struct type##_vector* vector);                        \
-  } type##_vector __attribute__((packed));                             \
-                                                                       \
-  static void push_##type##_vector(type##_vector* vect, type value) {  \
-    if (vect->size == vect->capacity) {                                \
-      vector_resize((vector*) vect);                                   \
-    }                                                                  \
-    vect->data[vect->size] = value;                                    \
-    vect->size++;                                                      \
-  }                                                                    \
-                                                                       \
-  static type pop_##type##_vector(type##_vector* vect) {               \
-    vect->size--;                                                      \
-    return vect->data[vect->size];                                     \
-  }                                                                    \
-                                                                       \
-  static void delete_##type##_vector(type##_vector* vect) {            \
-    delete_vector((vector*) vect);                                     \
-  }                                                                    \ 
-                                                                       \
-  static type##_vector* new_##type##_vector() {                        \
-    type##_vector* vector = new_vector(                                \
-      sizeof(type##_vector), sizeof(type));                            \
-    vector->delete = delete_##type##_vector;                           \
-    vector->push = push_##type##_vector;                               \
-    vector->pop = pop_##type##_vector;                                 \
-    return vector;                                                     \
-  }                                                                    \
+#define GENERATE_VECTOR(type)                                                \
+  typedef struct type ## _vector {                                           \
+    uint32_t size;                                                           \
+    uint32_t capacity;                                                       \
+    size_t data_size;                                                        \
+    type* data;                                                              \
+    void(*delete) (struct type ## _vector* vector);                          \
+    void (* push)(struct type ## _vector* vector,                            \
+                  type                    value);                            \
+    type (* pop)(struct type ## _vector* vector);                            \
+  } type ## _vector __attribute__((packed));                                 \
+                                                                             \
+  static void push_ ## type ## _vector(type ## _vector * vect, type value) { \
+    if (vect->size == vect->capacity) {                                      \
+      vector_resize((vector*) vect);                                         \
+    }                                                                        \
+    vect->data[vect->size] = value;                                          \
+    vect->size++;                                                            \
+  }                                                                          \
+                                                                             \
+  static type pop_ ## type ## _vector(type ## _vector * vect) {              \
+    vect->size--;                                                            \
+    return vect->data[vect->size];                                           \
+  }                                                                          \
+                                                                             \
+  static void delete_ ## type ## _vector(type ## _vector * vect) {           \
+    delete_vector((vector*) vect);                                           \
+  }                                                                          \
+                                                                             \
+  static type ## _vector* new_ ## type ## _vector() {                        \
+    type ## _vector * vector = new_vector(                                   \
+      sizeof(type ## _vector), sizeof(type));                                \
+    vector->delete = delete_ ## type ## _vector;                             \
+    vector->push = push_ ## type ## _vector;                                 \
+    vector->pop = pop_ ## type ## _vector;                                   \
+    return vector;                                                           \
+  }                                                                          \
 
-#define GENERATE_PTR_VECTOR(type)                                      \
-  typedef struct type##_ptr_vector {                                   \
-    uint32_t size;                                                     \
-    uint32_t capacity;                                                 \
-    size_t data_size;                                                  \
-    type** data;                                                       \
-    bool own_ptrs;                                                     \
-    void (*delete) (struct type##_ptr_vector* vector);                 \
-    void (*push) (struct type##_ptr_vector* vector, type* value);      \
-    type* (*pop) (struct type##_ptr_vector* vector);                   \
-  } type##_ptr_vector __attribute__((packed));                         \
-                                                                       \
-  static void push_##type##_ptr_vector(                                \
-      type##_ptr_vector* vect, type* value) {                          \
-    if (vect->size == vect->capacity) {                                \
-      vector_resize(vect);                                             \
-    }                                                                  \
-    vect->data[vect->size] = value;                                    \
-    vect->size++;                                                      \
-  }                                                                    \
-                                                                       \
-  static type* pop_##type##_ptr_vector(type##_ptr_vector* vect) {      \
-    vect->size--;                                                      \
-    return vect->data[vect->size];                                     \
-  }                                                                    \
-                                                                       \
-  static void delete_##type##_ptr_vector(type##_ptr_vector* vect) {    \
-    if (vect->own_ptrs) {                                              \
-      for (size_t i = 0; i < vect->size; i++) {                        \
-        kfree(vect->data[i]);                                          \
-      }                                                                \
-    }                                                                  \
-    delete_vector((vector*) vect);                                     \
-  }                                                                    \ 
-                                                                       \
-  static type##_ptr_vector* new_##type##_ptr_vector(bool own_ptrs) {   \
-    type##_ptr_vector* vector = new_vector(                            \
-      sizeof(type##_ptr_vector), sizeof(type*));                       \
-    vector->own_ptrs = own_ptrs;                                       \
-    vector->delete = delete_##type##_ptr_vector;                       \
-    vector->push = push_##type##_ptr_vector;                           \
-    vector->pop = pop_##type##_ptr_vector;                             \
-    return vector;                                                     \
-  }                                                                    \
+#define GENERATE_PTR_VECTOR(type)                                          \
+  typedef struct type ## _ptr_vector {                                     \
+    uint32_t size;                                                         \
+    uint32_t capacity;                                                     \
+    size_t data_size;                                                      \
+    type** data;                                                           \
+    bool own_ptrs;                                                         \
+    void(*delete) (struct type ## _ptr_vector* vector);                    \
+    void (* push)(struct type ## _ptr_vector* vector,                      \
+                  type                      * value);                      \
+    type* (*pop)(struct type ## _ptr_vector* vector);                      \
+  } type ## _ptr_vector __attribute__((packed));                           \
+                                                                           \
+  static void push_ ## type ## _ptr_vector(                                \
+    type ## _ptr_vector * vect, type * value) {                            \
+    if (vect->size == vect->capacity) {                                    \
+      vector_resize(vect);                                                 \
+    }                                                                      \
+    vect->data[vect->size] = value;                                        \
+    vect->size++;                                                          \
+  }                                                                        \
+                                                                           \
+  static type* pop_ ## type ## _ptr_vector(type ## _ptr_vector * vect) {   \
+    vect->size--;                                                          \
+    return vect->data[vect->size];                                         \
+  }                                                                        \
+                                                                           \
+  static void delete_ ## type ## _ptr_vector(type ## _ptr_vector * vect) { \
+    if (vect->own_ptrs) {                                                  \
+      for (size_t i = 0; i < vect->size; i++) {                            \
+        kfree(vect->data[i]);                                              \
+      }                                                                    \
+    }                                                                      \
+    delete_vector((vector*) vect);                                         \
+  }                                                                        \
+                                                                           \
+  static type ## _ptr_vector* new_ ## type ## _ptr_vector(bool own_ptrs) { \
+    type ## _ptr_vector * vector = new_vector(                             \
+      sizeof(type ## _ptr_vector), sizeof(type*));                         \
+    vector->own_ptrs = own_ptrs;                                           \
+    vector->delete = delete_ ## type ## _ptr_vector;                       \
+    vector->push = push_ ## type ## _ptr_vector;                           \
+    vector->pop = pop_ ## type ## _ptr_vector;                             \
+    return vector;                                                         \
+  }                                                                        \
 
 GENERATE_VECTOR(int);
 GENERATE_VECTOR(char);
 GENERATE_VECTOR(double);
 GENERATE_PTR_VECTOR(char);
 
-#endif  // _VECTOR_H_
+#endif // _VECTOR_H_
