@@ -5,15 +5,13 @@ NEW_SUITE(HeapTest, 7);
 
 extern free_list_t free_list_;
 
-TEST(EmptyMalloc) {
-  EXPECT_EQ(NULL, kmalloc(0));
-}
+TEST(EmptyMalloc) { EXPECT_EQ(NULL, kmalloc(0)); }
 
 TEST(Malloc) {
   size_t size = sizeof(int) * 10;
   int* ptr = kmalloc(size);
 
-  meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
+  meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
   EXPECT_EQ(metadata->size, size);
   EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
   EXPECT_EQ(metadata->next, NULL);
@@ -22,14 +20,12 @@ TEST(Malloc) {
   kfree(ptr);
 }
 
-TEST(FreeNull) {
-  kfree(NULL);
-}
+TEST(FreeNull) { kfree(NULL); }
 
 TEST(FreeNotMallocedDoesntWork) {
   // TODO(psamora) When we add abort,  figure out how to test this
   char* ptr = kmalloc(1);
-  meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
+  meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
 
   // Since we are not freeing the right pointer, nothing will happen
   kfree(ptr + 1);
@@ -44,7 +40,7 @@ TEST(FreeNotMallocedDoesntWork) {
 
 TEST(FreeMalloced) {
   char* ptr = kmalloc(25);
-  meta_alloc_t* metadata = get_metadata((virtual_addr) ptr);
+  meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
   kfree(ptr);
   EXPECT_GTE(metadata->size, 25);
   EXPECT_NE(metadata->checksum, MALLOCED_CHECKSUM);
@@ -94,6 +90,4 @@ TEST(SplittingBlockOfMemory) {
 
 END_SUITE();
 
-void test_heap() {
-  RUN_SUITE(HeapTest);
-}
+void test_heap() { RUN_SUITE(HeapTest); }

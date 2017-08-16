@@ -1,17 +1,17 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
-#include <asm.h>
-#include <devices/kb.h>
-#include <devices/timer.h>
-#include <external/multiboot.h>
 #include <arch/i386/gdt.h>
 #include <arch/i386/idt.h>
 #include <arch/i386/irq.h>
 #include <arch/i386/isrs.h>
 #include <arch/i386/tty.h>
+#include <asm.h>
+#include <devices/kb.h>
+#include <devices/timer.h>
+#include <external/multiboot.h>
 #include <libk/heap.h>
 #include <libk/phys_mem.h>
 #include <libk/virt_mem.h>
@@ -44,9 +44,9 @@ void kernel_main(void) {
   printf("Hello, kernel World %d!\n", 25);
   printf("Size of dude %d!\n", sizeof(new_meta_alloc_t));
   int a = 10;
-  printf("%lx \n", (uint32_t) &a);
-  printf("aia %lx\n", virt_to_phys((virtual_addr) &a));
-  for(;;) {
+  printf("%lx \n", (uint32_t)&a);
+  printf("aia %lx\n", virt_to_phys((virtual_addr)&a));
+  for (;;) {
     asm("hlt");
   }
 }

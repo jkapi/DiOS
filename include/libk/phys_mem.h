@@ -1,9 +1,9 @@
 #ifndef _LIBK_KPHYS_MEM_H_
 #define _LIBK_KPHYS_MEM_H_
 
+#include <libk/memlayout.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <libk/memlayout.h>
 
 // Physical memory manager
 // Currently implemented using bit map based allocation

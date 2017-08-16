@@ -42,7 +42,7 @@ int find_free_blocks(uint32_t count) {
     if (cur_block == 0xFFFFFFFF) {
       cur_block_num = 0;
       continue;
-    } 
+    }
 
     for (uint8_t j = 0; j < 32; j++) {
       int bit = 1 << j;
@@ -55,10 +55,10 @@ int find_free_blocks(uint32_t count) {
       if (!cur_block_num) starting_block_bit = j;
       cur_block_num += 1;
       if (cur_block_num == count) {
-        return (32 * starting_block) + starting_block_bit; 
+        return (32 * starting_block) + starting_block_bit;
       }
     }
-  } 
+  }
   return -1;
 }
 
@@ -81,7 +81,7 @@ physical_addr alloc_block() {
 
 void free_block(physical_addr addr) {
   int block = addr / PHYS_BLOCK_SIZE;
- 
+
   map_unset(block);
   used_blocks_--;
 }
@@ -115,8 +115,7 @@ physical_addr alloc_blocks(uint32_t count) {
 void free_blocks(physical_addr addr, uint32_t count) {
   int block = addr / PHYS_BLOCK_SIZE;
 
-  for (uint32_t i = 0; i < count; i++)
-    map_unset(block + i);
+  for (uint32_t i = 0; i < count; i++) map_unset(block + i);
 
   used_blocks_ -= count;
 }
@@ -145,13 +144,13 @@ void free_chunk(int base_addr, int length) {
 // Functions to initialize the Physical Memory Manager
 
 void free_available_memory(struct multiboot_info* mb) {
-  multiboot_memory_map_t* mm = (multiboot_memory_map_t*) mb->mmap_addr;
-  while ((unsigned int) mm < mb->mmap_addr + mb->mmap_length) {
+  multiboot_memory_map_t* mm = (multiboot_memory_map_t*)mb->mmap_addr;
+  while ((unsigned int)mm < mb->mmap_addr + mb->mmap_length) {
     if (mm->type == MULTIBOOT_MEMORY_AVAILABLE) {
       free_chunk(mm->addr, mm->len);
     }
-    mm = (multiboot_memory_map_t*) ((unsigned int) mm +
-      mm->size + sizeof(mm->size));
+    mm = (multiboot_memory_map_t*)((unsigned int)mm + mm->size +
+                                   sizeof(mm->size));
   }
   map_set(0);
 }
@@ -160,7 +159,7 @@ void phys_memory_init(struct multiboot_info* mb) {
   phys_mem_size_kb_ = mb->mem_upper + mb->mem_lower;
   total_blocks_ = (phys_mem_size_kb_ * 1024) / PHYS_BLOCK_SIZE;
   used_blocks_ = total_blocks_;
-  phys_memory_map_ = (uint32_t*) KERNEL_END_PADDR;
+  phys_memory_map_ = (uint32_t*)KERNEL_END_PADDR;
   memset(phys_memory_map_, 0xFF, total_blocks_ / PHYS_BLOCKS_PER_BYTE);
   printf("Total blocks: %ld\n", total_blocks_);
 
@@ -172,13 +171,11 @@ void phys_memory_init(struct multiboot_info* mb) {
 
   // We also need to allocate the memory used by the Physical Map itself
   allocate_chunk(*phys_memory_map_, total_blocks_);
-  kernel_phys_map_start = (uint32_t) phys_memory_map_;
-  kernel_phys_map_end = kernel_phys_map_start + (
-    total_blocks_ / PHYS_BLOCKS_PER_BYTE);
+  kernel_phys_map_start = (uint32_t)phys_memory_map_;
+  kernel_phys_map_end =
+      kernel_phys_map_start + (total_blocks_ / PHYS_BLOCKS_PER_BYTE);
   printf("PhysMem Manager installed. Mem Map start: %lx, end: %lx\n",
-    kernel_phys_map_start, kernel_phys_map_end);
+         kernel_phys_map_start, kernel_phys_map_end);
 }
 
-void update_map_addr(physical_addr addr) {
-  phys_memory_map_ = (uint32_t*) addr;
-}
+void update_map_addr(physical_addr addr) { phys_memory_map_ = (uint32_t*)addr; }

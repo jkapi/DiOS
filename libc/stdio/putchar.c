@@ -6,10 +6,10 @@
 
 int putchar(int ic) {
 #if defined(__is_dios_kernel)
-  char c = (char) ic;
+  char c = (char)ic;
   t_write(&c, sizeof(c));
 #else
-  // TODO: You need to implement a write system call.
+// TODO: You need to implement a write system call.
 #endif
   return ic;
 }

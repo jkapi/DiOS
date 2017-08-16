@@ -22,7 +22,7 @@ vector* new_vector(size_t vector_size, size_t data_size) {
 void delete_vector(vector* vector) {
   kfree(vector->data);
   kfree(vector);
-} 
+}
 
 void vector_pop(vector* vector) {
   if (vector->size == 0) {

@@ -4,12 +4,12 @@
 #include <stdint.h>
 
 // Constants to the boundaries of memory
-#define KERNEL_START_PADDR ((uint32_t) &kernel_phys_start)
-#define KERNEL_END_PADDR ((uint32_t) &kernel_phys_end)
+#define KERNEL_START_PADDR ((uint32_t)&kernel_phys_start)
+#define KERNEL_END_PADDR ((uint32_t)&kernel_phys_end)
 #define KERNEL_SIZE (KERNEL_END_PADDR - KERNEL_START_PADDR)
 
-#define KERNEL_START_VADDR ((uint32_t) &kernel_virt_start)
-#define KERNEL_END_VADDR ((uint32_t) &kernel_virt_end)
+#define KERNEL_START_VADDR ((uint32_t)&kernel_virt_start)
+#define KERNEL_END_VADDR ((uint32_t)&kernel_virt_end)
 
 #define KERNEL_PHYS_MAP_START kernel_phys_map_start
 #define KERNEL_PHYS_MAP_END kernel_phys_map_end
@@ -20,18 +20,18 @@
 #define PHYS_BLOCK_SIZE 4096
 
 // Constants to the Virtual Memory Manager
-#define TEMPORARY_TABLE_ADDR (void*) 0xC03FF000
+#define TEMPORARY_TABLE_ADDR (void*)0xC03FF000
 #define PAGES_PER_TABLE 1024
 #define PAGES_PER_DIR 1024
 #define PAGE_SIZE 4096
 
 // Constants to the Kernel heap
-#define HEAP_VIRT_ADDR_START 0xC0500000 // if kernel size > 4MB, change
+#define HEAP_VIRT_ADDR_START 0xC0500000  // if kernel size > 4MB, change
 #define HEAP_INITIAL_BLOCK_SIZE 128
 
-#define HEAP_BLOCK_SIZE 16 // bytes
-#define HEAP_BLOCK_BIT_MAP_SIZE 32 // 32 bytes can represent 256 blocks
-#define HEAP_BLOCK_COUNT 250 // amount of blocks we can fit beside the bitmap
+#define HEAP_BLOCK_SIZE 16          // bytes
+#define HEAP_BLOCK_BIT_MAP_SIZE 32  // 32 bytes can represent 256 blocks
+#define HEAP_BLOCK_COUNT 250  // amount of blocks we can fit beside the bitmap
 
 // Functions to
 #define ALIGN_BLOCK(addr) (addr) - ((addr) % PHYS_BLOCK_SIZE);

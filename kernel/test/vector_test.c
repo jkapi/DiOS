@@ -1,5 +1,5 @@
-#include <test/unit.h>
 #include <libk/vector.h>
+#include <test/unit.h>
 
 NEW_SUITE(VectorTest, 10);
 
@@ -8,8 +8,8 @@ TEST(IntVectorBasicUsage) {
   push(vector, 1);
   int popped = pop(vector);
   EXPECT_EQ(1, popped);
-  
-  delete(vector);
+
+  delete (vector);
 }
 
 TEST(CharPtrVectorBasicUsage) {
@@ -19,7 +19,7 @@ TEST(CharPtrVectorBasicUsage) {
   char* popped = pop(ptr_vector);
   EXPECT_EQ(c, *popped);
 
-  delete(ptr_vector);
+  delete (ptr_vector);
 }
 
 TEST(VectorExpandsCorrectly) {
@@ -46,11 +46,9 @@ TEST(VectorExpandsCorrectly) {
     EXPECT_EQ('a' + i, popped);
   }
 
-  delete(vector);
+  delete (vector);
 }
 
 END_SUITE();
 
-void test_vector() {
-  RUN_SUITE(VectorTest);
-}
+void test_vector() { RUN_SUITE(VectorTest); }

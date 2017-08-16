@@ -41,9 +41,7 @@ void t_backspace() {
   update_cursor(t_row, t_column);
 }
 
-void t_setcolor(uint8_t color) {
-  t_color = color;
-}
+void t_setcolor(uint8_t color) { t_color = color; }
 
 void t_putentryat(char c, uint8_t color, size_t x, size_t y) {
   const size_t index = y * VGA_WIDTH + x;
@@ -84,10 +82,7 @@ void t_scroll() {
 }
 
 void t_write(const char* data, size_t size) {
-  for (size_t i = 0; i < size; i++)
-    t_putchar(data[i]);
+  for (size_t i = 0; i < size; i++) t_putchar(data[i]);
 }
 
-void t_writestring(const char* data) {
-  t_write(data, strlen(data));
-}
+void t_writestring(const char* data) { t_write(data, strlen(data)); }

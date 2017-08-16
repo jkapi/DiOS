@@ -1,9 +1,9 @@
 #ifndef _LIBK_KPAGING_H_
 #define _LIBK_KPAGING_H_
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <libk/memlayout.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 // A Page Table Entry points to a single page stored somewhere in memory/disk
 
@@ -64,7 +64,7 @@ enum PAGE_PDE_FLAGS {
   I86_PDE_LV4_GLOBAL = 0x200,
   I86_PDE_FRAME = 0x7FFFF000
 };
- 
+
 inline void pd_entry_add_attrib(pd_entry* entry, uint32_t attrib) {
   *entry |= attrib;
 }
@@ -81,13 +81,9 @@ inline bool pd_entry_is_present(pd_entry entry) {
   return entry & I86_PDE_PRESENT;
 }
 
-inline bool pd_entry_is_user(pd_entry entry) {
-  return entry & I86_PDE_USER;
-}
+inline bool pd_entry_is_user(pd_entry entry) { return entry & I86_PDE_USER; }
 
-inline bool pd_entry_is_4mb(pd_entry entry) {
-  return entry & I86_PDE_4MB;
-}
+inline bool pd_entry_is_4mb(pd_entry entry) { return entry & I86_PDE_4MB; }
 
 inline bool pd_entry_is_writable(pd_entry entry) {
   return entry & I86_PDE_WRITABLE;

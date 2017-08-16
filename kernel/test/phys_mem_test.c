@@ -1,5 +1,5 @@
-#include <test/unit.h>
 #include <libk/phys_mem.h>
+#include <test/unit.h>
 
 NEW_SUITE(PhysMemTest, 7);
 
@@ -12,15 +12,15 @@ TEST(AllocBlock) {
 TEST(FreeBlock) {
   physical_addr addr = alloc_block();
   free_block(addr);
-  EXPECT_FALSE(is_alloced(addr));  
+  EXPECT_FALSE(is_alloced(addr));
 }
 
 TEST(FreeAndAllocSameBlock) {
   physical_addr first_addr = alloc_block();
-  free_block(first_addr); 
+  free_block(first_addr);
   EXPECT_FALSE(is_alloced(first_addr));
   physical_addr second_addr = alloc_block();
-  EXPECT_TRUE(is_alloced(second_addr));  
+  EXPECT_TRUE(is_alloced(second_addr));
   EXPECT_EQ(first_addr, second_addr);
 }
 
@@ -50,12 +50,12 @@ TEST(AllocTenFreeMiddleAndReallocMiddle) {
   for (int i = 0; i < 3; i++) {
     EXPECT_FALSE(is_alloced(fifth_block + (PHYS_BLOCK_SIZE * i)));
   }
-  
+
   physical_addr new_alloc = alloc_blocks(3);
   for (int i = 0; i < 3; i++) {
     EXPECT_TRUE(is_alloced(fifth_block + (PHYS_BLOCK_SIZE * i)));
     EXPECT_EQ(new_alloc + (PHYS_BLOCK_SIZE * i),
-      fifth_block + (PHYS_BLOCK_SIZE * i));
+              fifth_block + (PHYS_BLOCK_SIZE * i));
   }
 }
 
@@ -75,6 +75,4 @@ TEST(AllocTenFreeMiddleAndReallocEnd) {
 
 END_SUITE();
 
-void test_phys_mem() {
-  RUN_SUITE(PhysMemTest);
-}
+void test_phys_mem() { RUN_SUITE(PhysMemTest); }

@@ -13,91 +13,97 @@ typedef struct test_info_t {
 } test_info_t;
 
 // Defines macros for testing
-#define NEW_SUITE(suite_name, max_num_tests)                                   \
-  void suite_name##_run() {                                                    \
-    char* name = #suite_name;                                                  \
-    test_info_t tests[max_num_tests];                                          \
-    size_t test_count = 0;                                                     \
+#define NEW_SUITE(suite_name, max_num_tests) \
+  void suite_name##_run() {                  \
+    char* name = #suite_name;                \
+    test_info_t tests[max_num_tests];        \
+    size_t test_count = 0;
 
-#define END_SUITE()                                                            \
-  size_t failed_tests = 0;                                                     \
-  for (size_t i = 0; i < test_count; i++) {                                    \
-    bool passed = true;                                                        \
-    test_info_t* cur_test = &tests[i];                                         \
-    unsigned long memory_counter = 0;                                          \
-    track_memory_malloced(&memory_counter);                                    \
-    cur_test->fn(cur_test, &passed);                                           \
-    if (!passed) {                                                             \
-      failed_tests++;                                                          \
-    }                                                                          \
-    untrack_memory_malloced(&memory_counter);                                  \
-    if (memory_counter > 0) {                                                  \
-      printf("Test %s had memory leaks. %d blocks not freed\n.",               \
-        cur_test->name, memory_counter);                                       \      
-    }                                                                          \
-  }                                                                            \
-  if (failed_tests == 0) {                                                     \
-    printf("Test suite %s passed! %d/%d\n", name, test_count, test_count);     \
-  } else {                                                                     \
-    printf("Test suite %s failed! %d/%d passed\n",                             \
-      name, test_count - failed_tests, test_count);                            \    
-  }                                                                            \
-}                                                                              \
+#define END_SUITE()                                                        \
+  size_t failed_tests = 0;                                                 \
+  for (size_t i = 0; i < test_count; i++) {                                \
+    bool passed = true;                                                    \
+    test_info_t* cur_test = &tests[i];                                     \
+    unsigned long memory_counter = 0;                                      \
+    track_memory_malloced(&memory_counter);                                \
+    cur_test->fn(cur_test, &passed);                                       \
+    if (!passed) {                                                         \
+      failed_tests++;                                                      \
+    }                                                                      \
+    untrack_memory_malloced(&memory_counter);                              \
+    if (memory_counter > 0) {                                              \
+      printf("Test %s had memory leaks. %d blocks not freed\n.",           \
+             cur_test->name, memory_counter);                              \
+      \      
+                                                             \
+    }                                                                      \
+  }                                                                        \
+  if (failed_tests == 0) {                                                 \
+    printf("Test suite %s passed! %d/%d\n", name, test_count, test_count); \
+  } else {                                                                 \
+    printf("Test suite %s failed! %d/%d passed\n", name,                   \
+           test_count - failed_tests, test_count);                         \
+    \    
+                                                                 \
+  }                                                                        \
+  }
 
-#define RUN_SUITE(suite_name) do {                   \
-  printf("Running suite " #suite_name "...\n");      \
-  suite_name##_run();                                \
-  printf("Suite done...\n");      \
-} while (0)
+#define RUN_SUITE(suite_name)                     \
+  do {                                            \
+    printf("Running suite " #suite_name "...\n"); \
+    suite_name##_run();                           \
+    printf("Suite done...\n");                    \
+  } while (0)
 
-#define TEST(fn_name)                                \
-  auto void fn_name(test_info_t*, bool* passed);     \
-  tests[test_count].name = #fn_name;                 \
-  tests[test_count++].fn = fn_name;                  \
-  void fn_name(test_info_t* info, bool* passed)      \
+#define TEST(fn_name)                            \
+  auto void fn_name(test_info_t*, bool* passed); \
+  tests[test_count].name = #fn_name;             \
+  tests[test_count++].fn = fn_name;              \
+  void fn_name(test_info_t* info, bool* passed)
 
-#define TEST_FAILED() {                              \
-  printf("Test failed - %s. Found at %s:%d\n",       \
-      info->name, __FILE__, __LINE__);               \
-  *passed = false;                                   \
-}                                                    
+#define TEST_FAILED()                                                  \
+  {                                                                    \
+    printf("Test failed - %s. Found at %s:%d\n", info->name, __FILE__, \
+           __LINE__);                                                  \
+    *passed = false;                                                   \
+  }
 
-#define EXPECT_EQ(expected, result) do {             \
-  if (expected != result)                            \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_EQ(expected, result)        \
+  do {                                     \
+    if (expected != result) TEST_FAILED(); \
+  } while (0)
 
-#define EXPECT_NE(expected, result) do {             \
-  if (expected == result)                            \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_NE(expected, result)        \
+  do {                                     \
+    if (expected == result) TEST_FAILED(); \
+  } while (0)
 
-#define EXPECT_GT(max, min) do {                     \
-  if (min >= max)                                    \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_GT(max, min)        \
+  do {                             \
+    if (min >= max) TEST_FAILED(); \
+  } while (0)
 
-#define EXPECT_GTE(max, min) do {                    \
-  if (min > max)                                     \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_GTE(max, min)      \
+  do {                            \
+    if (min > max) TEST_FAILED(); \
+  } while (0)
 
-#define EXPECT_LT(min, max) do {                     \
-  if (max <= min)                                    \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_LT(min, max)        \
+  do {                             \
+    if (max <= min) TEST_FAILED(); \
+  } while (0)
 
-#define EXPECT_LTE(min, max) do {                    \
-  if (max < min)                                     \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_LTE(min, max)      \
+  do {                            \
+    if (max < min) TEST_FAILED(); \
+  } while (0)
 
-#define EXPECT_TRUE(expression) do {                 \
-  if (!expression)                                   \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_TRUE(expression)     \
+  do {                              \
+    if (!expression) TEST_FAILED(); \
+  } while (0)
 
-#define EXPECT_FALSE(expression) do {                \
-  if (expression)                                    \
-    TEST_FAILED();                                   \
-} while (0)
+#define EXPECT_FALSE(expression)   \
+  do {                             \
+    if (expression) TEST_FAILED(); \
+  } while (0)

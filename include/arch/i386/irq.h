@@ -7,7 +7,7 @@ struct regs;
 void irq_install();
 
 // Adds an IRQ handler to the IDT
-void irq_install_handler(int irq, void (*handler) (struct regs *r));
+void irq_install_handler(int irq, void (*handler)(struct regs *r));
 
 // Removes an IRQ from the IDT
 void irq_uninstall_handler(int irq);

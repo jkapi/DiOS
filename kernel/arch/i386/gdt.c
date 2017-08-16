@@ -1,8 +1,8 @@
-#include <stdio.h>
-#include <stdint.h>
 #include <arch/i386/gdt.h>
+#include <stdint.h>
+#include <stdio.h>
 
-// Defines a GDT entry. 
+// Defines a GDT entry.
 struct gdt_entry {
   uint16_t limit_low;
   uint16_t base_low;
@@ -10,15 +10,14 @@ struct gdt_entry {
   uint8_t access;
   uint8_t granularity;
   uint8_t base_high;
-} __attribute__((packed)); // prevents compiler to optimize struct
-
+} __attribute__((packed));  // prevents compiler to optimize struct
 
 // Special pointer which includes the limit: The max bytes
 // taken up by the GDT, minus 1.
 struct gdt_ptr {
-    uint16_t  limit;
-    uint32_t base;
-} __attribute__((packed)); // prevents compiler to optimize struct
+  uint16_t limit;
+  uint32_t base;
+} __attribute__((packed));  // prevents compiler to optimize struct
 
 // Our GDT, with 3 entries, and finally our special GDT pointer
 struct gdt_entry gdt[3];
@@ -28,8 +27,8 @@ struct gdt_ptr gp;
 extern void gdt_flush(struct gdt_ptr* gdt_ptr_addr);
 
 // Setup a descriptor in the Global Descriptor Table
-void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit,
-    uint8_t access, uint8_t gran) {
+void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access,
+                  uint8_t gran) {
   // Setup the descriptor base address
   gdt[num].base_low = (base & 0xFFFF);
   gdt[num].base_middle = (base >> 16) & 0xFF;
@@ -51,7 +50,7 @@ void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit,
 void gdt_install() {
   //  Setup the GDT pointer and limit
   gp.limit = (sizeof(struct gdt_entry) * 3) - 1;
-  gp.base = (uint32_t) &gdt;
+  gp.base = (uint32_t)&gdt;
 
   //  Our NULL descriptor
   gdt_set_gate(0, 0, 0, 0, 0);
