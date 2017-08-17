@@ -3,90 +3,90 @@
 
 NEW_SUITE(HeapTest, 7);
 
-extern free_list_t free_list_;
+// extern free_list_t free_list_;
 
 TEST(EmptyMalloc) { EXPECT_EQ(NULL, kmalloc(0)); }
 
-TEST(Malloc) {
-  size_t size = sizeof(int) * 10;
+TEST(MallocFreeExactBlockSize) {
+  size_t size = sizeof(int) * HEAP_BLOCK_SIZE;
   int* ptr = kmalloc(size);
 
-  meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
-  EXPECT_EQ(metadata->size, size);
-  EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
-  EXPECT_EQ(metadata->next, NULL);
+  heap_page_t* heap_page = get_heap_block_metadata(ptr);
+  EXPECT_EQ(heap_page->num_available_blocks, 
+      HEAP_BLOCK_COUNT - size / HEAP_BLOCK_SIZE);
 
   // Clean-up
   kfree(ptr);
+  EXPECT_EQ(heap_page->num_available_blocks, HEAP_BLOCK_COUNT);
 }
 
-TEST(FreeNull) { kfree(NULL); }
+// TEST(FreeNull) { kfree(NULL); }
 
-TEST(FreeNotMallocedDoesntWork) {
-  // TODO(psamora) When we add abort,  figure out how to test this
-  char* ptr = kmalloc(1);
-  meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
+// TEST(FreeNotMallocedDoesntWork) {
+//   // TODO(psamora) When we add abort,  figure out how to test this
+//   char* ptr = kmalloc(1);
+//   meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
 
-  // Since we are not freeing the right pointer, nothing will happen
-  kfree(ptr + 1);
+//   // Since we are not freeing the right pointer, nothing will happen
+//   kfree(ptr + 1);
 
-  EXPECT_GTE(metadata->size, 1);
-  EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
-  EXPECT_EQ(metadata->next, NULL);
+//   EXPECT_GTE(metadata->size, 1);
+//   EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
+//   EXPECT_EQ(metadata->next, NULL);
 
-  // Clean-up
-  kfree(ptr);
-}
+//   // Clean-up
+//   kfree(ptr);
+// }
 
-TEST(FreeMalloced) {
-  char* ptr = kmalloc(25);
-  meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
-  kfree(ptr);
-  EXPECT_GTE(metadata->size, 25);
-  EXPECT_NE(metadata->checksum, MALLOCED_CHECKSUM);
-  EXPECT_NE(metadata->next, NULL);
-}
+// TEST(FreeMalloced) {
+//   char* ptr = kmalloc(25);
+//   meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
+//   kfree(ptr);
+//   EXPECT_GTE(metadata->size, 25);
+//   EXPECT_NE(metadata->checksum, MALLOCED_CHECKSUM);
+//   EXPECT_NE(metadata->next, NULL);
+// }
 
-TEST(FreeListCorrectlyPopulated) {
-  // Populate the free_list with 10 free blocks of increasing size
-  for (size_t i = 1; i <= 10; i++) {
-    char* ptr = kmalloc(i);
-    kfree(ptr);
-  }
+// TEST(FreeListCorrectlyPopulated) {
+//   // Populate the free_list with 10 free blocks of increasing size
+//   for (size_t i = 1; i <= 10; i++) {
+//     char* ptr = kmalloc(i);
+//     kfree(ptr);
+//   }
 
-  meta_alloc_t* cur_metadata = free_list_.head;
+//   meta_alloc_t* cur_metadata = free_list_.head;
 
-  // Check the first 10 free blocks in the FreeList are in decreasing order
-  for (size_t i = 10; i > 9; i--) {
-    EXPECT_GTE(cur_metadata->size, i);
-    EXPECT_NE(cur_metadata->checksum, MALLOCED_CHECKSUM);
-    EXPECT_NE(cur_metadata->next, NULL);
-    cur_metadata = cur_metadata->next;
-  }
-}
+//   // Check the first 10 free blocks in the FreeList are in decreasing order
+//   for (size_t i = 10; i > 9; i--) {
+//     EXPECT_GTE(cur_metadata->size, i);
+//     EXPECT_NE(cur_metadata->checksum, MALLOCED_CHECKSUM);
+//     EXPECT_NE(cur_metadata->next, NULL);
+//     cur_metadata = cur_metadata->next;
+//   }
+// }
 
-TEST(SplittingBlockOfMemory) {
-  size_t large_block_size = 200;
+// TEST(SplittingBlockOfMemory) {
+//   size_t large_block_size = 200;
 
-  // Allocate large block and free it so it is in the front of the FreeList
-  char* ptr = kmalloc(large_block_size);
-  kfree(ptr);
+//   // Allocate large block and free it so it is in the front of the FreeList
+//   char* ptr = kmalloc(large_block_size);
+//   kfree(ptr);
 
-  // Allocate 10 blocks, asserting the block in the front keeps decreasing
-  // since we are just splitting the block above
-  for (size_t i = 1; i <= 10; i++) {
-    char* ptr = kmalloc(i);
+//   // Allocate 10 blocks, asserting the block in the front keeps decreasing
+//   // since we are just splitting the block above
+//   for (size_t i = 1; i <= 10; i++) {
+//     char* ptr = kmalloc(i);
 
-    large_block_size -= i + META_ALLOC_SIZE;
+//     large_block_size -= i + META_ALLOC_SIZE;
 
-    meta_alloc_t* free_metadata = free_list_.head;
-    EXPECT_GTE(free_metadata->size, large_block_size);
-    EXPECT_NE(free_metadata->checksum, MALLOCED_CHECKSUM);
+//     meta_alloc_t* free_metadata = free_list_.head;
+//     EXPECT_GTE(free_metadata->size, large_block_size);
+//     EXPECT_NE(free_metadata->checksum, MALLOCED_CHECKSUM);
 
-    // Clean-up
-    kfree(ptr);
-  }
-}
+//     // Clean-up
+//     kfree(ptr);
+//   }
+// }
 
 END_SUITE();
 

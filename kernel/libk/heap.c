@@ -3,28 +3,49 @@
 #include <stdio.h>
 #include <string.h>
 
+void request_memory();
+void initialize_heap_page(heap_page_t* heap_page);
+heap_page_t* get_fitting_heap_page(heap_page_list_t* heap_page_list,
+                                   size_t blocks_to_alloc);
+int32_t find_fitting_block_start(heap_page_t* heap_page,
+                                 size_t blocks_to_alloc);
+void allocate_blocks(heap_page_t* heap_page,
+                     int32_t first_fitting_block,
+                     size_t blocks_to_alloc);
+
+inline static void* align_block(void* ptr) {
+  return (void*) (((virtual_addr) ptr / HEAP_BLOCK_SIZE) * HEAP_BLOCK_SIZE);
+}
+
+inline static bool map_check(unsigned char* bitmap, size_t block) {
+  return bitmap[block / 8] & (1 << (block % 8));
+}
+
+inline static void map_set(unsigned char* bitmap, size_t block) {
+  bitmap[block / 8] |= (1 << (block % 8));
+}
+
+inline static void map_unset(unsigned char* bitmap, size_t block) {
+  bitmap[block / 8] &= ~(1 << (block % 8));
+}
+
 void kernel_heap_init() {
-  free_list_.head = NULL;
+  heap_page_list_.head = NULL;
   cur_heap_addr_ = HEAP_VIRT_ADDR_START;
   printf("Kernel heap installed.\n");
 }
 
-void print_free_list(free_list_t* free_list) {
-  printf("FreeList: ");
-  meta_alloc_t* cur = free_list->head;
-  while (cur) {
-    printf("%lx:%u", (uint32_t)cur, cur->size);
-    printf(" -> ");
-    cur = cur->next;
-  }
-  printf(" NULL\n");
-}
+// void print_heap_page_list(heap_page_list_t* heap_page_list) {
+//   printf("FreeList: ");
+//   meta_alloc_t* cur = heap_page_list->head;
+//   while (cur) {
+//     printf("%lx:%u", (uint32_t)cur, cur->size);
+//     printf(" -> ");
+//     cur = cur->next;
+//   }
+//   printf(" NULL\n");
+// }
 
-bool can_be_split(size_t block_size, size_t requested_bytes) {
-  // A block can be split if it has the space needed for another metadata block
-  // and the requested bytes and there's still space left in the original block
-  return block_size > META_ALLOC_SIZE + requested_bytes;
-}
 
 // TODO(psamora) Make it work for > 4096, refactor
 void* kmalloc(size_t bytes) {
@@ -32,103 +53,177 @@ void* kmalloc(size_t bytes) {
     return NULL;
   }
 
-  // Find the first block that can fit our requested memory
-  meta_alloc_t* free_block = first_free_block(&free_list_, bytes);
+  size_t blocks_to_alloc = HEAP_BLOCKS_NEED_FOR_N_BYTES(bytes);
 
-  // If we can't find a block, request 4KB to the heap and retry
-  if (!free_block) {
-    free_list_.head = (meta_alloc_t*)cur_heap_addr_;
+  // Find the first heap page that can fit our requested memory
+  heap_page_t* free_heap_page = get_fitting_heap_page(&heap_page_list_,
+                                                      blocks_to_alloc);
+
+  // If we can't find a heap page that might fit the bytes, request a new
+  // block of 4KB and try mallocing on it
+  if (!free_heap_page) {
     request_memory(cur_heap_addr_);
     return kmalloc(bytes);
   }
 
-  meta_alloc_t* alloced_ptr = free_block;
-
-  // If our block is bigger than the number of bytes we need to split it
-  if (can_be_split(alloced_ptr->size, bytes)) {
-    alloced_ptr = split_block(free_block, bytes, &free_list_);
+  // Tries to fiend a sequence of blocks that can fit the bytes in the heap
+  // page. If we can't find it, request a new block of 4KB and try mallocing it
+  int32_t first_fitting_block = find_fitting_block_start(free_heap_page,
+                                                         blocks_to_alloc);
+  if (first_fitting_block == -1) {
+    request_memory(cur_heap_addr_);
+    return kmalloc(bytes);    
   }
 
-  increase_memory_tracker(alloced_ptr);
-  return alloced_ptr + 1;
+  // Success! Populate the bitmaps in the heap page to indicate that we 
+  // allocated the memory
+  allocate_blocks(free_heap_page, first_fitting_block, blocks_to_alloc);
+
+  increase_memory_tracker(bytes);
+  return &free_heap_page->alloc_memory[
+      first_fitting_block * HEAP_BLOCK_SIZE];
 }
 
 void kfree(void* ptr) {
   if (!ptr) {
     return;
   }
-  meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
+  heap_page_t* heap_page = get_heap_block_metadata(ptr);
 
-  // Checks if we are actually freeing a malloced pointer
-  if (metadata->checksum != MALLOCED_CHECKSUM) {
+  // Checks if we are actually freeing a malloced heap block
+  if (heap_page->checksum != MALLOCED_CHECKSUM) {
     // abort
     return;
   }
 
-  // Adds freed blocl to the head of the FreeList
-  metadata->checksum = 0;
-  metadata->next = free_list_.head;
-  free_list_.head = metadata;
-  decrease_memory_tracker(metadata);
-}
+  // Get a pointer to the beginning of the block of this pointer
+  void* block_ptr = align_block(ptr);
 
-meta_alloc_t* first_free_block(free_list_t* free_list, size_t bytes) {
-  // If list is empty, just return NULL
-  if (free_list->head == NULL) {
-    return NULL;
-  }
+  // Get the block number for this pointer
+  size_t block_num = 
+    (block_ptr - (void*) heap_page->alloc_memory) / HEAP_BLOCK_SIZE;
 
-  meta_alloc_t* prev = NULL;
-  meta_alloc_t* cur = free_list->head;
-
-  while (cur && cur->size < bytes) {
-    prev = cur;
-    cur = cur->next;
-  }
-
-  if (prev == NULL) {
-    // If prev is NULL, we pick the head of the list and need to update it
-    free_list->head = cur->next;
-  } else {
-    // Otherwise, just remove the found block from the middle of the list
-    prev->next = cur->next;
-  }
-  return cur;
-}
-
-meta_alloc_t* split_block(meta_alloc_t* old_block, size_t bytes,
-                          free_list_t* free_list) {
-  int new_block_size = META_ALLOC_SIZE + bytes;
-
-  // Resizes the old_block and attaches it to the front of the FreeList
-  old_block->size = old_block->size - new_block_size;
-  old_block->next = free_list->head;
-  free_list->head = old_block;
-
-  // Creates and fill the metadata of the new block of requested size
-  meta_alloc_t* new_block = (meta_alloc_t*)((void*)old_block + old_block->size);
-  set_metadata((virtual_addr)new_block, bytes);
-
-  // Returns the newly created block addr
-  return new_block;
-}
-
-void request_memory(virtual_addr addr) {
-  if (!alloc_page(addr)) {
+  // Check in the first_alloced_bitmap if this is the start of the allocation 
+  if (map_check(heap_page->first_alloced_bitmap, block_num) == false) {
     // abort
     return;
   }
-  set_metadata(addr, PAGE_SIZE - META_ALLOC_SIZE);
+
+  // Unset the first block in the first_alloced_bitmap since it won't be the
+  // first anymore
+  map_unset(heap_page->first_alloced_bitmap, block_num);
+
+  // Free the allocation from the alloced_block_bitmap for all blocks
+  // by using the first_alloced_bitmap to find the start of the next alloc
+  size_t alloc_block_size = 0;
+  for (size_t i = block_num; i < HEAP_BLOCK_COUNT; i++) {
+    bool is_first = map_check(heap_page->first_alloced_bitmap, i);
+    bool is_alloced = map_check(heap_page->alloced_block_bitmap, i);
+    if (!is_first) {
+      // We found the start of the next alloc, stop.
+      return;
+    }
+    if (!is_alloced) {
+      // We found memory that isn't allocated, stop.
+      return;
+    }
+    map_unset(heap_page->alloced_block_bitmap, i);
+    alloc_block_size++;
+  }
+
+  heap_page->num_available_blocks += alloc_block_size;
+  decrease_memory_tracker(alloc_block_size * HEAP_BLOCK_SIZE);
+}
+
+// Requests 4KB from the virtual memory to be owned by the heap
+void request_memory() {
+  heap_page_t* new_heap_page = (heap_page_t*) cur_heap_addr_;
+  heap_page_list_.head = new_heap_page;
+  if (!alloc_page(cur_heap_addr_)) {
+    // abort
+    return;
+  }
+  initialize_heap_page(new_heap_page);
   cur_heap_addr_ += PAGE_SIZE;
 }
 
-meta_alloc_t* get_metadata(virtual_addr addr) {
-  return (meta_alloc_t*)addr - 1;
+void initialize_heap_page(heap_page_t* heap_page) {
+  heap_page->num_available_blocks = HEAP_BLOCK_COUNT;
+  // TODO(psamora) Mark last bits of bitmap as used since these aren't
+  // actually memory blocks that we can free
 }
 
-void set_metadata(virtual_addr addr, size_t bytes) {
-  meta_alloc_t* metadata = (meta_alloc_t*)addr;
-  metadata->size = bytes;
-  metadata->next = NULL;
-  metadata->checksum = MALLOCED_CHECKSUM;
+// Returns the first existing heap page in the heap_page_list that can fit the
+// given number of bytes. If none can be found, returns NULL
+heap_page_t* get_fitting_heap_page(heap_page_list_t* heap_page_list,
+                                   size_t blocks_to_alloc) {
+  // If list is empty, just return NULL
+  if (heap_page_list->head == NULL) {
+    return NULL;
+  }
+
+  heap_page_t* cur = heap_page_list->head;
+
+  while (cur && cur->num_available_blocks < blocks_to_alloc) {
+    cur = cur->next;
+  }
+
+  return cur;
+}
+
+// Given a Heap Page and the number of blocks_to_alloc, return the Heap
+// Block number of the first of a sequence of free blocks that can
+// fit blocks_to_alloc. Returns -1 if no sequence exists.
+int32_t find_fitting_block_start(heap_page_t* heap_page,
+                                 size_t blocks_to_alloc) {
+  size_t starting_block = 0;
+  size_t starting_block_bit = 0;
+  size_t cur_block_num = 0;
+  for (size_t i = 0; i < HEAP_BLOCK_BIT_MAP_SIZE; i++) {
+    unsigned char cur_byte = heap_page->alloced_block_bitmap[i];
+    if (cur_byte == 0xFF) {
+      cur_block_num = 0;
+      continue;
+    }
+
+    for (size_t j = 0; j < 8; j++) {
+      int bit = 1 << j;
+      if (bit & cur_byte) {  // bit is set
+        cur_block_num = 0;
+        continue;
+      }
+
+      if (cur_block_num == 0) {
+        starting_block = i;
+        starting_block_bit = j;
+      }
+      cur_block_num += 1;
+
+      if (cur_block_num == blocks_to_alloc) {
+        // We found a sequence that can fit, return the beginning block number
+        return (HEAP_BLOCK_BIT_MAP_SIZE * starting_block) + starting_block_bit;
+      }
+    }
+  }
+  return -1;
+}
+
+void allocate_blocks(heap_page_t* heap_page,
+                     int32_t first_fitting_block,
+                     size_t blocks_to_alloc) {
+  // Mark the beginning of the block in the first_alloced_bitmap
+  map_set(heap_page->first_alloced_bitmap, first_fitting_block);
+
+  // Mark all the alloced blocks in the alloced_block_bitmap
+  for (size_t i = first_fitting_block; 
+       i < first_fitting_block + blocks_to_alloc;
+       i++) {
+    map_set(heap_page->alloced_block_bitmap, i);
+  }
+  // Update the num_available_blocks
+  heap_page->num_available_blocks -= blocks_to_alloc;
+}
+
+heap_page_t* get_heap_block_metadata(void* ptr) {
+  return (heap_page_t*) (((virtual_addr) ptr / PAGE_SIZE) * PAGE_SIZE);
 }

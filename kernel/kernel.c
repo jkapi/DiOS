@@ -41,8 +41,7 @@ void kernel_early(struct multiboot_info* mb) {
 }
 
 void kernel_main(void) {
-  printf("Hello, kernel World %d!\n", 25);
-  printf("Size of dude %d!\n", sizeof(new_meta_alloc_t));
+  printf("Hello, kernel World %d!\n", HEAP_PAGE_ACTUAL_SIZE);
   int a = 10;
   printf("%lx \n", (uint32_t)&a);
   printf("aia %lx\n", virt_to_phys((virtual_addr)&a));
