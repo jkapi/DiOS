@@ -79,7 +79,7 @@ void* kmalloc(size_t bytes) {
   // allocated the memory
   allocate_blocks(free_heap_page, first_fitting_block, blocks_to_alloc);
 
-  increase_memory_tracker(bytes);
+  increase_memory_tracker(blocks_to_alloc * HEAP_BLOCK_SIZE);
   return &free_heap_page->alloc_memory[
       first_fitting_block * HEAP_BLOCK_SIZE];
 }
@@ -227,4 +227,50 @@ void allocate_blocks(heap_page_t* heap_page,
 
 heap_page_t* get_heap_block_metadata(void* ptr) {
   return (heap_page_t*) (((virtual_addr) ptr / PAGE_SIZE) * PAGE_SIZE);
+}
+
+// Implementation for the heap memory leak checker functions
+
+// Reset previous memory leak run and start tracking memory usage
+void track_memory_malloced() {
+  is_tracking_memory_ = true;
+  memory_tracker_counter_alloc_count_ = 0;
+  memory_tracker_counter_free_count_ = 0;
+  memory_tracker_counter_bytes_ = 0;
+}
+
+// Stop tracking memory leaks. You can still print_memory_report() after
+// this operation for the results until track_memory_malloced() is called again.
+void untrack_memory_malloced() {
+  is_tracking_memory_ = false;
+}
+
+// Print memory status from the current memory analysis (if an analysis is
+// currently running) or from the previous run (if no analysis is running).
+void print_memory_report(bool verbose) {
+  if (memory_tracker_counter_bytes_ == 0) {
+    if (!verbose) {
+      return;
+    }
+    printf("No memory leaks found during execution! ");
+  } else {
+    printf("Memory leak found! %lu bytes not freed. ",
+      memory_tracker_counter_bytes_);
+  }
+  printf("Mallocs: %lu. Frees: %lu. \n",
+    memory_tracker_counter_alloc_count_, memory_tracker_counter_free_count_);
+}
+
+void increase_memory_tracker(size_t bytes) {
+  if (is_tracking_memory_) {
+    memory_tracker_counter_alloc_count_ += 1;
+    memory_tracker_counter_bytes_ += bytes;
+  }
+}
+
+void decrease_memory_tracker(size_t bytes) {
+  if (is_tracking_memory_) {
+    memory_tracker_counter_free_count_ += 1;
+    memory_tracker_counter_bytes_ -= bytes;
+  }
 }

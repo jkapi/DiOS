@@ -37,26 +37,32 @@ virtual_addr cur_heap_addr_;
 void* kmalloc(size_t size);
 void kfree(void* ptr);
 
-// These are two functions use to compute memory leaks.
-// Pass in the pointer to the counter to be used to track the leaks.
-// While that counter is set, it will be populated with the malloced/freed bytes
-// Once the tracking is done, the user MUST call untrack_memory_malloced
-static unsigned long* memory_tracker_counter_ = NULL;
-
-static void track_memory_malloced(unsigned long* counter) {
-  memory_tracker_counter_ = counter;
-}
-static void untrack_memory_malloced() { memory_tracker_counter_ = NULL; }
-
-static void increase_memory_tracker(size_t bytes) {
-  if (memory_tracker_counter_) memory_tracker_counter_ += bytes;
-}
-
-static void decrease_memory_tracker(size_t bytes) {
-  if (memory_tracker_counter_) memory_tracker_counter_ -= bytes;
-}
-
 void kernel_heap_init();
 heap_page_t* get_heap_block_metadata(void* ptr);
+
+// These are functions use to compute memory leaks.
+// TODO(psamora) Figure out a nice way to restructure this
+// so that test maybe inject these as a struct or something
+
+static bool is_tracking_memory_ = false;
+static unsigned long memory_tracker_counter_alloc_count_ = 0;
+static unsigned long memory_tracker_counter_free_count_ = 0;
+static unsigned long memory_tracker_counter_bytes_ = 0;
+
+// Reset previous memory leak run and start tracking memory usage
+void track_memory_malloced();
+
+// Stop tracking memory leaks. You can still print_memory_report() after
+// this operation for the results until track_memory_malloced() is called again.
+void untrack_memory_malloced();
+
+// Print memory status from the current memory analysis (if an analysis is
+// currently running) or from the previous run (if no analysis is running).
+void print_memory_report(bool verbose);
+
+void increase_memory_tracker(size_t bytes);
+
+void decrease_memory_tracker(size_t bytes);
+
 
 #endif  // _LIBK_HEAP_

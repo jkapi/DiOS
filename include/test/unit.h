@@ -24,19 +24,13 @@ typedef struct test_info_t {
   for (size_t i = 0; i < test_count; i++) {                                \
     bool passed = true;                                                    \
     test_info_t* cur_test = &tests[i];                                     \
-    unsigned long memory_counter = 0;                                      \
-    track_memory_malloced(&memory_counter);                                \
+    track_memory_malloced();                                               \
     cur_test->fn(cur_test, &passed);                                       \
     if (!passed) {                                                         \
       failed_tests++;                                                      \
     }                                                                      \
-    untrack_memory_malloced(&memory_counter);                              \
-    if (memory_counter > 0) {                                              \
-      printf("Test %s had memory leaks. %d blocks not freed\n.",           \
-             cur_test->name, memory_counter);                              \
-      \      
-                                                             \
-    }                                                                      \
+    untrack_memory_malloced();                                             \
+    print_memory_report(false);                                             \
   }                                                                        \
   if (failed_tests == 0) {                                                 \
     printf("Test suite %s passed! %d/%d\n", name, test_count, test_count); \
