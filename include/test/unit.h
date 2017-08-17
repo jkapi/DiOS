@@ -61,49 +61,64 @@ typedef struct test_info_t {
   tests[test_count++].fn = fn_name;              \
   void fn_name(test_info_t* info, bool* passed)
 
-#define TEST_FAILED()                                                  \
+#define TEST_FAILED(__message, ...)                                    \
   {                                                                    \
-    printf("Test failed - %s. Found at %s:%d\n", info->name, __FILE__, \
-           __LINE__);                                                  \
+    printf("Test failed - %s. ", info->name);                          \
+    printf((__message), __VA_ARGS__);                                  \
+    printf(" Found at %s:%d\n", __FILE__, __LINE__);                   \
     *passed = false;                                                   \
   }
 
-#define EXPECT_EQ(expected, result)        \
-  do {                                     \
-    if (expected != result) TEST_FAILED(); \
+#define EXPECT_EQ(expected, result)                                   \
+  do {                                                                \
+    if (expected != result)                                           \
+      TEST_FAILED("EQ - Expected: %d, Actual: %d",                    \
+        (int) expected, (int) result);                                \
   } while (0)
 
-#define EXPECT_NE(expected, result)        \
-  do {                                     \
-    if (expected == result) TEST_FAILED(); \
+#define EXPECT_NE(expected, result)                                   \
+  do {                                                                \
+    if (expected == result)                                           \
+      TEST_FAILED("NE - Expected: %d, Actual: %d",                    \
+        (int) expected, (int) result);                                \
   } while (0)
 
-#define EXPECT_GT(max, min)        \
-  do {                             \
-    if (min >= max) TEST_FAILED(); \
+#define EXPECT_GT(max, min)                                           \
+  do {                                                                \
+    if (min >= max)                                                   \
+      TEST_FAILED("%d isn't greater than %d",                         \
+        (int) max, (int) min);                                        \
   } while (0)
 
-#define EXPECT_GTE(max, min)      \
-  do {                            \
-    if (min > max) TEST_FAILED(); \
+#define EXPECT_GTE(max, min)                                          \
+  do {                                                                \
+    if (min > max)                                                    \
+      TEST_FAILED("%d isn't greater than or equal to %d",             \
+        (int) max, (int) min);                                        \
   } while (0)
 
-#define EXPECT_LT(min, max)        \
-  do {                             \
-    if (max <= min) TEST_FAILED(); \
+#define EXPECT_LT(min, max)                                           \
+  do {                                                                \
+    if (max <= min)                                                   \
+      TEST_FAILED("%d isn't lesser than %d",                          \
+        (int) min, (int) max);                                        \
   } while (0)
 
-#define EXPECT_LTE(min, max)      \
-  do {                            \
-    if (max < min) TEST_FAILED(); \
+#define EXPECT_LTE(min, max)                                          \
+  do {                                                                \
+    if (max < min)                                                    \
+      TEST_FAILED("%d isn't lesser than or equal to %d",              \
+        (int) min, (int) max);                                        \
   } while (0)
 
-#define EXPECT_TRUE(expression)     \
-  do {                              \
-    if (!expression) TEST_FAILED(); \
+#define EXPECT_TRUE(expression)                                       \
+  do {                                                                \
+    if (!expression)                                                  \
+      TEST_FAILED("Variable isn't true %d.", (int) expression);       \
   } while (0)
 
-#define EXPECT_FALSE(expression)   \
-  do {                             \
-    if (expression) TEST_FAILED(); \
+#define EXPECT_FALSE(expression)                                      \
+  do {                                                                \
+    if (expression)                                                   \
+      TEST_FAILED("Variable isn't true %d.", (int) expression);       \
   } while (0)
