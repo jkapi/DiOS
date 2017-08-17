@@ -120,5 +120,5 @@ typedef struct test_info_t {
 #define EXPECT_FALSE(expression)                                      \
   do {                                                                \
     if (expression)                                                   \
-      TEST_FAILED("Variable isn't true %d.", (int) expression);       \
+      TEST_FAILED("Variable isn't false %d.", (int) expression);      \
   } while (0)

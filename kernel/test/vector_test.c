@@ -1,7 +1,7 @@
 #include <libk/vector.h>
 #include <test/unit.h>
 
-NEW_SUITE(VectorTest, 10);
+NEW_SUITE(VectorTest, 3);
 
 TEST(IntVectorBasicUsage) {
   int_vector* vector = new_int_vector();

@@ -41,10 +41,10 @@ void kernel_early(struct multiboot_info* mb) {
 }
 
 void kernel_main(void) {
-  printf("Hello, kernel World %d!\n", HEAP_PAGE_ACTUAL_SIZE);
-  int a = 10;
-  printf("%lx \n", (uint32_t)&a);
-  printf("aia %lx\n", virt_to_phys((virtual_addr)&a));
+  // printf("Hello, kernel World %d!\n", HEAP_PAGE_ACTUAL_SIZE);
+  // int a = 10;
+  // printf("%lx \n", (uint32_t)&a);
+  // printf("aia %lx\n", virt_to_phys((virtual_addr)&a));
   for (;;) {
     asm("hlt");
   }

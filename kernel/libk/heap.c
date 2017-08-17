@@ -119,13 +119,13 @@ void kfree(void* ptr) {
   for (size_t i = block_num; i < HEAP_BLOCK_COUNT; i++) {
     bool is_first = map_check(heap_page->first_alloced_bitmap, i);
     bool is_alloced = map_check(heap_page->alloced_block_bitmap, i);
-    if (!is_first) {
+    if (is_first) {
       // We found the start of the next alloc, stop.
-      return;
+      break;
     }
     if (!is_alloced) {
       // We found memory that isn't allocated, stop.
-      return;
+      break;
     }
     map_unset(heap_page->alloced_block_bitmap, i);
     alloc_block_size++;
@@ -148,6 +148,7 @@ void request_memory() {
 }
 
 void initialize_heap_page(heap_page_t* heap_page) {
+  heap_page->checksum = MALLOCED_CHECKSUM;
   heap_page->num_available_blocks = HEAP_BLOCK_COUNT;
   // TODO(psamora) Mark last bits of bitmap as used since these aren't
   // actually memory blocks that we can free
