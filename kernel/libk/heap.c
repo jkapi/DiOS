@@ -13,8 +13,8 @@ void allocate_blocks(heap_page_t* heap_page,
                      int32_t first_fitting_block,
                      size_t blocks_to_alloc);
 
-inline static void* align_block(void* ptr) {
-  return (void*) (((virtual_addr) ptr / HEAP_BLOCK_SIZE) * HEAP_BLOCK_SIZE);
+inline static bool is_aligned(void* relative_ptr) {
+  return (uint32_t) relative_ptr % HEAP_BLOCK_SIZE == 0;
 }
 
 inline static bool map_check(unsigned char* bitmap, size_t block) {
@@ -80,8 +80,7 @@ void* kmalloc(size_t bytes) {
   allocate_blocks(free_heap_page, first_fitting_block, blocks_to_alloc);
 
   increase_memory_tracker(blocks_to_alloc * HEAP_BLOCK_SIZE);
-  return &free_heap_page->alloc_memory[
-      first_fitting_block * HEAP_BLOCK_SIZE];
+  return &free_heap_page->alloc_memory[first_fitting_block * HEAP_BLOCK_SIZE];
 }
 
 void kfree(void* ptr) {
@@ -96,12 +95,16 @@ void kfree(void* ptr) {
     return;
   }
 
-  // Get a pointer to the beginning of the block of this pointer
-  void* block_ptr = align_block(ptr);
+  void* relative_addr = (ptr - (void*) heap_page->alloc_memory);
+
+  // Checks if this relative pointer is actually aligned to a block start
+  if (!is_aligned(relative_addr)) {
+    // abort
+    return;
+  }
 
   // Get the block number for this pointer
-  size_t block_num = 
-    (block_ptr - (void*) heap_page->alloc_memory) / HEAP_BLOCK_SIZE;
+  size_t block_num = ((virtual_addr) relative_addr) / HEAP_BLOCK_SIZE;
 
   // Check in the first_alloced_bitmap if this is the start of the allocation 
   if (map_check(heap_page->first_alloced_bitmap, block_num) == false) {
@@ -138,11 +141,14 @@ void kfree(void* ptr) {
 // Requests 4KB from the virtual memory to be owned by the heap
 void request_memory() {
   heap_page_t* new_heap_page = (heap_page_t*) cur_heap_addr_;
-  heap_page_list_.head = new_heap_page;
   if (!alloc_page(cur_heap_addr_)) {
     // abort
     return;
   }
+  memset(new_heap_page, 0x0, PAGE_SIZE / 8);
+  heap_page_t* current_head = heap_page_list_.head;
+  heap_page_list_.head = new_heap_page;
+  new_heap_page->next = current_head;
   initialize_heap_page(new_heap_page);
   cur_heap_addr_ += PAGE_SIZE;
 }
@@ -202,7 +208,7 @@ int32_t find_fitting_block_start(heap_page_t* heap_page,
 
       if (cur_block_num == blocks_to_alloc) {
         // We found a sequence that can fit, return the beginning block number
-        return (HEAP_BLOCK_BIT_MAP_SIZE * starting_block) + starting_block_bit;
+        return (8 * starting_block) + starting_block_bit;
       }
     }
   }
@@ -273,4 +279,8 @@ void decrease_memory_tracker(size_t bytes) {
     memory_tracker_counter_free_count_ += 1;
     memory_tracker_counter_bytes_ -= bytes;
   }
+}
+
+void force_empty_heap_page() {
+
 }

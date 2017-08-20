@@ -64,5 +64,8 @@ void increase_memory_tracker(size_t bytes);
 
 void decrease_memory_tracker(size_t bytes);
 
+// Helper used for tests for the Heap that force the heap to have an
+// empty Heap Page as the default one used
+void force_empty_heap_page();
 
 #endif  // _LIBK_HEAP_

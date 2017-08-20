@@ -17,9 +17,18 @@ typedef struct test_info_t {
   void suite_name##_run() {                  \
     char* name = #suite_name;                \
     test_info_t tests[max_num_tests];        \
+    fn_ptr setup_suite_fn = NULL;            \
     size_t test_count = 0;
 
+#define SETUP_SUITE()                                                      \
+  auto void setup_suite();                                                 \
+  setup_suite_fn = setup_suite;                                            \
+  void setup_suite()                                                       
+
 #define END_SUITE()                                                        \
+  if (setup_suite_fn != NULL) {                                            \
+    setup_suite_fn();                                                      \
+  }                                                                        \
   size_t failed_tests = 0;                                                 \
   for (size_t i = 0; i < test_count; i++) {                                \
     bool passed = true;                                                    \
@@ -30,7 +39,7 @@ typedef struct test_info_t {
       failed_tests++;                                                      \
     }                                                                      \
     untrack_memory_malloced();                                             \
-    print_memory_report(false);                                             \
+    print_memory_report(false);                                            \
   }                                                                        \
   if (failed_tests == 0) {                                                 \
     printf("Test suite %s passed! %d/%d\n", name, test_count, test_count); \
@@ -61,6 +70,7 @@ typedef struct test_info_t {
     printf((__message), __VA_ARGS__);                                  \
     printf(" Found at %s:%d\n", __FILE__, __LINE__);                   \
     *passed = false;                                                   \
+    return;                                                            \
   }
 
 #define EXPECT_EQ(expected, result)                                   \
