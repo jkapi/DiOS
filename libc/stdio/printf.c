@@ -8,7 +8,7 @@ typedef enum { SHORT_SHORT, SHORT, DEFAULT, LONG, LONG_LONG } length_specifier;
 #define print_num(__type, __base, __num)                        \
   {                                                             \
     if (__num == 0) {                                           \
-      return putchar('0');                                      \
+      putchar('0');                                             \
     }                                                           \
     char buffer[20];                                            \
     int count = 0;                                              \
