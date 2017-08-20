@@ -5,16 +5,17 @@
 
 typedef enum { SHORT_SHORT, SHORT, DEFAULT, LONG, LONG_LONG } length_specifier;
 
-#define print_num(__type, __base, __num)                        \
+// TODO(psamora) These don't have to be this bad, refactor
+#define print_num(__base, __casted_num)                         \
   {                                                             \
-    if (__num == 0) {                                           \
+    if (__casted_num == 0) {                                    \
       putchar('0');                                             \
     }                                                           \
     char buffer[20];                                            \
     int count = 0;                                              \
-    while (num != 0) {                                          \
-      buffer[count++] = digits[num % __base];                   \
-      num /= base;                                              \
+    while (__casted_num != 0) {                                 \
+      buffer[count++] = digits[__casted_num % __base];          \
+      __casted_num /= __base;                                   \
     }                                                           \
     for (size_t i = count; i != 0; i--) putchar(buffer[i - 1]); \
   }
@@ -26,13 +27,13 @@ typedef enum { SHORT_SHORT, SHORT, DEFAULT, LONG, LONG_LONG } length_specifier;
       putchar('-');                               \
       num *= -1;                                  \
     }                                             \
-    print_num(__type, __base, num);               \
+    print_num(__base, num);                       \
   };
 
 #define print_ushort(__type, __base, __parameters) \
   {                                                \
     __type num = va_arg(__parameters, int);        \
-    print_num(__type, __base, num);                \
+    print_num(__base, num);                        \
   };
 
 #define print_int(__type, __base, __parameters) \
@@ -42,13 +43,13 @@ typedef enum { SHORT_SHORT, SHORT, DEFAULT, LONG, LONG_LONG } length_specifier;
       putchar('-');                             \
       num *= -1;                                \
     }                                           \
-    print_num(__type, __base, num);             \
+    print_num(__base, num);                     \
   };
 
 #define print_uint(__type, __base, __parameters) \
   {                                              \
     __type num = va_arg(__parameters, __type);   \
-    print_num(__type, __base, num);              \
+    print_num(__base, num);                      \
   };
 
 const char digits[] = "0123456789abcdef";
