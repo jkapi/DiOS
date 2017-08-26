@@ -1,5 +1,5 @@
 #include <arch/i386/idt.h>
-#include <arch/i386/irq.h>
+#include <arch/i386/interrupts.h>
 #include <asm.h>
 #include <devices/timer.h>
 #include <stdio.h>
@@ -17,11 +17,13 @@ void timer_phase(int hz) {
 }
 
 // IRQ Handler for the timer. Called at every clock tick
-void timer_handler(struct regs *r) { timer_ticks++; }
+void timer_handler(struct regs *r) {
+  timer_ticks++;
+}
 
 // Sets up the system clock
 void timer_install() {
-  irq_install_handler(0, timer_handler);
+  register_interrupt_handler(TIMER_IDT_INDEX, timer_handler);
   timer_phase(TICKS_PER_SECOND);
   printf("Timer installed.\n");
 }

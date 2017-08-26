@@ -1,6 +1,5 @@
 #include <arch/i386/idt.h>
-#include <arch/i386/irq.h>
-#include <arch/i386/isrs.h>
+#include <arch/i386/interrupts.h>
 #include <arch/i386/tty.h>
 #include <asm.h>
 #include <devices/kb.h>
@@ -147,7 +146,7 @@ void keyboard_handler(__attribute__((unused)) struct regs *r) {
 
 // Sets up the keyboard
 void keyboard_install() {
-  irq_install_handler(1, keyboard_handler);
+  register_interrupt_handler(KEYBOARD_IDT_INDEX, keyboard_handler);
   state.caps_lock = 0;
   state.shift_held = 0;
   printf("Keyboard installed.\n");
