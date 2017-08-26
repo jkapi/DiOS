@@ -15,7 +15,13 @@ SETUP_SUITE() {
 }
 // extern free_list_t free_list_;
 
-TEST(EmptyMalloc) { EXPECT_EQ(NULL, kmalloc(0)); }
+TEST(EmptyMalloc) { 
+  EXPECT_EQ(NULL, kmalloc(0));
+}
+
+TEST(MallocLargerThanBlockLimit) {
+  EXPECT_EQ(NULL, kmalloc(HEAP_BLOCK_COUNT * HEAP_BLOCK_SIZE + 1));
+}
 
 TEST(MallocFreeExactBlockSize) {
   size_t size = sizeof(int) * HEAP_BLOCK_SIZE;
@@ -109,75 +115,118 @@ TEST(MultipleMallocAndFrees) {
   kfree(ptr1);
   kfree(ptr2);
   kfree(ptr3);
+  // Assert we cleaned the bitmaps
+  for (size_t i = 0; i < expected_allocated_block_count; i++) {
+    EXPECT_FALSE(map_check(heap_page->alloced_block_bitmap, i));
+    EXPECT_FALSE(map_check(heap_page->first_alloced_bitmap, i));
+  }
 }
 
-// TEST(FreeNull) { kfree(NULL); }
+TEST(MallocMaxBlockSize) {
+  size_t size = HEAP_BLOCK_COUNT * HEAP_BLOCK_SIZE;
+  int* ptr = kmalloc(size);
 
-// TEST(FreeNotMallocedDoesntWork) {
-//   // TODO(psamora) When we add abort,  figure out how to test this
-//   char* ptr = kmalloc(1);
-//   meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
+  size_t expected_allocated_block_count = size / HEAP_BLOCK_SIZE;
+  heap_page_t* heap_page = get_heap_block_metadata(ptr);
+  EXPECT_EQ(heap_page->num_available_blocks, 
+      HEAP_BLOCK_COUNT - expected_allocated_block_count);
 
-//   // Since we are not freeing the right pointer, nothing will happen
-//   kfree(ptr + 1);
+   // Expect the alloced bitmap has the alloced blocks bits set
+  for (size_t i = 0; i < expected_allocated_block_count; i++) {
+    EXPECT_TRUE(map_check(heap_page->alloced_block_bitmap, i));
+  }
 
-//   EXPECT_GTE(metadata->size, 1);
-//   EXPECT_EQ(metadata->checksum, MALLOCED_CHECKSUM);
-//   EXPECT_EQ(metadata->next, NULL);
+  // Expect the first_alloced_bitmap has only the first block bit set
+  EXPECT_TRUE(map_check(heap_page->first_alloced_bitmap, 0));
+  for (size_t i = 1; i < expected_allocated_block_count; i++) {
+    EXPECT_FALSE(map_check(heap_page->first_alloced_bitmap, i));
+  }
 
-//   // Clean-up
-//   kfree(ptr);
-// }
+  // Clean-up
+  kfree(ptr);
+  EXPECT_EQ(heap_page->num_available_blocks, HEAP_BLOCK_COUNT);
+  // Assert we cleaned the bitmaps
+  for (size_t i = 0; i < expected_allocated_block_count; i++) {
+    EXPECT_FALSE(map_check(heap_page->alloced_block_bitmap, i));
+    EXPECT_FALSE(map_check(heap_page->first_alloced_bitmap, i));
+  }
+}
 
-// TEST(FreeMalloced) {
-//   char* ptr = kmalloc(25);
-//   meta_alloc_t* metadata = get_metadata((virtual_addr)ptr);
-//   kfree(ptr);
-//   EXPECT_GTE(metadata->size, 25);
-//   EXPECT_NE(metadata->checksum, MALLOCED_CHECKSUM);
-//   EXPECT_NE(metadata->next, NULL);
-// }
+TEST(InterleavingMallocFreeAndMalloc) {
+  // Alloc five allocations of size of increasing block sizes
+  int* ptr1 = kmalloc(HEAP_BLOCK_SIZE * 1);
+  int* ptr2 = kmalloc(HEAP_BLOCK_SIZE * 2);
+  int* ptr3 = kmalloc(HEAP_BLOCK_SIZE * 3);
+  int* ptr4 = kmalloc(HEAP_BLOCK_SIZE * 4);
+  int* ptr5 = kmalloc(HEAP_BLOCK_SIZE * 5);
 
-// TEST(FreeListCorrectlyPopulated) {
-//   // Populate the free_list with 10 free blocks of increasing size
-//   for (size_t i = 1; i <= 10; i++) {
-//     char* ptr = kmalloc(i);
-//     kfree(ptr);
-//   }
+  heap_page_t* heap_page = get_heap_block_metadata(ptr1);
+  EXPECT_EQ(heap_page->num_available_blocks, HEAP_BLOCK_COUNT - 15);
 
-//   meta_alloc_t* cur_metadata = free_list_.head;
+  // Free ptr4
+  kfree(ptr4);
 
-//   // Check the first 10 free blocks in the FreeList are in decreasing order
-//   for (size_t i = 10; i > 9; i--) {
-//     EXPECT_GTE(cur_metadata->size, i);
-//     EXPECT_NE(cur_metadata->checksum, MALLOCED_CHECKSUM);
-//     EXPECT_NE(cur_metadata->next, NULL);
-//     cur_metadata = cur_metadata->next;
-//   }
-// }
+  // Alloc a new ptr of size equal to 3 blocks
+  int* ptr6 = kmalloc(HEAP_BLOCK_SIZE * 3);
 
-// TEST(SplittingBlockOfMemory) {
-//   size_t large_block_size = 200;
+  // Expect ptr6 to be allocated in between ptr 3 and 5
+  EXPECT_GT(ptr6, ptr3);
+  EXPECT_LT(ptr6, ptr5);
 
-//   // Allocate large block and free it so it is in the front of the FreeList
-//   char* ptr = kmalloc(large_block_size);
-//   kfree(ptr);
+  // Alloc a new ptr of size of 1 blocks
+  int* ptr7 = kmalloc(HEAP_BLOCK_SIZE * 1);
 
-//   // Allocate 10 blocks, asserting the block in the front keeps decreasing
-//   // since we are just splitting the block above
-//   for (size_t i = 1; i <= 10; i++) {
-//     char* ptr = kmalloc(i);
+  // Expect ptr6 to be allocated in between ptr 6 and 5
+  EXPECT_GT(ptr7, ptr6);
+  EXPECT_LT(ptr7, ptr5);
 
-//     large_block_size -= i + META_ALLOC_SIZE;
+  // Finally, allocated a new ptr of size 6
+  int* ptr8 = kmalloc(HEAP_BLOCK_SIZE * 6);
 
-//     meta_alloc_t* free_metadata = free_list_.head;
-//     EXPECT_GTE(free_metadata->size, large_block_size);
-//     EXPECT_NE(free_metadata->checksum, MALLOCED_CHECKSUM);
+  // Expect ptr8 to be allocated in between after ptr 5
+  EXPECT_GT(ptr8, ptr5);
 
-//     // Clean-up
-//     kfree(ptr);
-//   }
-// }
+  // Free everything and assert the resulting bitmap is empty
+  kfree(ptr1);
+  kfree(ptr2);
+  kfree(ptr3);
+  kfree(ptr5);
+  kfree(ptr6);
+  kfree(ptr7);
+  kfree(ptr8);
+  EXPECT_EQ(heap_page->num_available_blocks, HEAP_BLOCK_COUNT);
+
+  // Assert we cleaned the bitmaps
+  for (size_t i = 0; i < HEAP_BLOCK_COUNT; i++) {
+    EXPECT_FALSE(map_check(heap_page->alloced_block_bitmap, i));
+    EXPECT_FALSE(map_check(heap_page->first_alloced_bitmap, i));
+  }
+}
+
+TEST(FreeNull) {
+  kfree(NULL);
+}
+
+TEST(FreeNotMallocedDoesntWork) {
+  size_t size = HEAP_BLOCK_COUNT * HEAP_BLOCK_SIZE;
+  int* ptr = kmalloc(size);
+
+  size_t expected_allocated_block_count = size / HEAP_BLOCK_SIZE;
+  heap_page_t* heap_page = get_heap_block_metadata(ptr);
+  EXPECT_EQ(heap_page->num_available_blocks, 
+      HEAP_BLOCK_COUNT - expected_allocated_block_count);
+
+  // Tries to free a pointer inside an allocated block, but that isn't the
+  // block start. In the future it should abort, for now it just does nothing
+  kfree(ptr + 1);
+
+  // Assert we didn't actually free anything
+  EXPECT_EQ(heap_page->num_available_blocks, 
+      HEAP_BLOCK_COUNT - expected_allocated_block_count);
+
+  kfree(ptr);
+}
+
 
 END_SUITE();
 

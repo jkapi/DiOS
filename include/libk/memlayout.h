@@ -30,8 +30,8 @@
 #define HEAP_INITIAL_BLOCK_SIZE 128
 
 #define HEAP_BLOCK_SIZE 16          // bytes
-#define HEAP_BLOCK_BIT_MAP_SIZE 32  // 32 bytes can represent 256 blocks
-#define HEAP_BLOCK_COUNT 250  // amount of blocks we can fit beside the bitmap
+#define HEAP_BLOCK_BIT_MAP_SIZE 31  // 31 bytes can represent 248 blocks
+#define HEAP_BLOCK_COUNT 248  // amount of blocks we can fit beside the bitmap
 #define HEAP_BLOCKS_NEED_FOR_N_BYTES(n)   \
 	(n / HEAP_BLOCK_SIZE) + (n % HEAP_BLOCK_SIZE == 0 ? 0 : 1)
 

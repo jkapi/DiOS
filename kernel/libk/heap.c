@@ -18,14 +18,23 @@ inline static bool is_aligned(void* relative_ptr) {
 }
 
 inline static bool map_check(unsigned char* bitmap, size_t block) {
+  if (block > HEAP_BLOCK_COUNT) {
+    return false;
+  }
   return bitmap[block / 8] & (1 << (block % 8));
 }
 
 inline static void map_set(unsigned char* bitmap, size_t block) {
+  if (block > HEAP_BLOCK_COUNT) {
+    return;
+  }
   bitmap[block / 8] |= (1 << (block % 8));
 }
 
 inline static void map_unset(unsigned char* bitmap, size_t block) {
+  if (block > HEAP_BLOCK_COUNT) {
+    return;
+  }
   bitmap[block / 8] &= ~(1 << (block % 8));
 }
 
@@ -47,9 +56,9 @@ void kernel_heap_init() {
 // }
 
 
-// TODO(psamora) Make it work for > 4096, refactor
+// TODO(psamora) Make it work for > 4000 bytes, refactor
 void* kmalloc(size_t bytes) {
-  if (bytes == 0) {
+  if (bytes == 0 || bytes > HEAP_BLOCK_COUNT * HEAP_BLOCK_SIZE) {
     return NULL;
   }
 
@@ -95,7 +104,7 @@ void kfree(void* ptr) {
     return;
   }
 
-  void* relative_addr = (ptr - (void*) heap_page->alloc_memory);
+  void* relative_addr = (void*) ptr - (void*) heap_page->alloc_memory;
 
   // Checks if this relative pointer is actually aligned to a block start
   if (!is_aligned(relative_addr)) {
@@ -156,8 +165,6 @@ void request_memory() {
 void initialize_heap_page(heap_page_t* heap_page) {
   heap_page->checksum = MALLOCED_CHECKSUM;
   heap_page->num_available_blocks = HEAP_BLOCK_COUNT;
-  // TODO(psamora) Mark last bits of bitmap as used since these aren't
-  // actually memory blocks that we can free
 }
 
 // Returns the first existing heap page in the heap_page_list that can fit the
