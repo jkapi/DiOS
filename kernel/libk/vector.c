@@ -24,13 +24,6 @@ void delete_vector(vector* vector) {
   kfree(vector);
 }
 
-void vector_pop(vector* vector) {
-  if (vector->size == 0) {
-    // error
-    return;
-  }
-}
-
 void vector_resize(vector* vector) {
   // TODO(psamora) When kheap become better, realloc would be awesome
   uint32_t new_capacity = vector->capacity * 2;

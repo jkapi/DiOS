@@ -1,23 +1,29 @@
 #include <libk/vector.h>
 #include <test/unit.h>
 
-NEW_SUITE(VectorTest, 3);
+NEW_SUITE(VectorTest, 6);
 
 TEST(IntVectorBasicUsage) {
   int_vector* vector = new_int_vector();
   push(vector, 1);
-  int popped = pop(vector);
-  EXPECT_EQ(1, popped);
+
+  int output;
+  bool popped = pop(vector, &output);
+  EXPECT_TRUE(popped);
+  EXPECT_EQ(output, 1);
 
   delete (vector);
 }
 
 TEST(CharPtrVectorBasicUsage) {
-  char_ptr_vector* ptr_vector = new_char_ptr_vector(false);
+  char_ptr_vector* ptr_vector = new_char_ptr_vector();
   char c = 'a';
   push(ptr_vector, &c);
-  char* popped = pop(ptr_vector);
-  EXPECT_EQ(c, *popped);
+
+  char* output;
+  bool popped = pop(ptr_vector, &output);
+  EXPECT_TRUE(popped);
+  EXPECT_EQ(output, &c);
 
   delete (ptr_vector);
 }
@@ -42,12 +48,58 @@ TEST(VectorExpandsCorrectly) {
   EXPECT_EQ(vector->capacity, 8);
 
   for (int i = 4; i >= 0; i--) {
-    char popped = pop(vector);
-    EXPECT_EQ('a' + i, popped);
+    char output;
+    bool popped = pop(vector, &output);
+    EXPECT_TRUE(popped);
+    EXPECT_EQ('a' + i, output);
   }
 
   delete (vector);
 }
+
+TEST(PopEmptyVectorFails) {
+  int_vector* vector = new_int_vector();
+  int output = 12345;
+  bool popped = pop(vector, &output);
+  EXPECT_FALSE(popped);
+  EXPECT_EQ(output, 12345);
+
+  delete (vector);
+}
+
+TEST(VectorGet) {
+  int_vector* vector = new_int_vector();
+  push(vector, 1);
+  push(vector, 2);
+
+  int output;
+  bool found = get(vector, 0, &output);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(output, 1);
+
+  found = get(vector, 1, &output);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(output, 2);
+
+  delete (vector);
+}
+
+
+TEST(VectorGetOutOfBoundsFail) {
+  int_vector* vector = new_int_vector();
+  int output = 12345;
+  bool found = get(vector, 0, &output);
+  EXPECT_FALSE(found);
+  EXPECT_EQ(output, 12345);
+
+  push(vector, 1);
+
+  found = get(vector, 1, &output);
+  EXPECT_FALSE(found);
+  EXPECT_EQ(output, 12345);
+  delete (vector);
+}
+
 
 END_SUITE();
 

@@ -28,22 +28,22 @@ typedef struct fs_node* (*finddir_fn_t) (struct fs_node*, char*);
 
 // A node in the File System
 typedef struct fs_node {
-    char name[MAX_FILENAME_SIZE];     // The name of this node.
-    uint8_t mask;                     // The permissions mask of this node.
-    uint32_t uid;                     // The owning user of this node.
-    uint32_t gid;                     // The owning group of this node.
-    uint32_t flags;                   // The type of this node.
-    uint32_t inode;                   // Device-specific
-    uint32_t length;                  // Size of the file, in bytes.
-    uint32_t impl;                    // An implementation-defined number.
-    struct fs_node* ptr;              // Used by mountpoints and symlinks.
+  char name[MAX_FILENAME_SIZE];     // Filename
+  uint8_t mask;                     // The permissions mask of this node.
+  uint32_t uid;                     // The owning user of this node.
+  uint32_t gid;                     // The owning group of this node.
+  uint32_t flags;                   // The type of this node.
+  uint32_t inode;                   // Device-specific
+  uint32_t length;                  // Size of the file, in bytes.
+  uint32_t impl;                    // An implementation-defined number.
+  struct fs_node* ptr;              // Used by mountpoints and symlinks.
 
-    read_fn_t read_fn;
-    write_fn_t write_fn;
-    open_fn_t open_fn;
-    close_fn_t close_fn;
-    readdir_fn_t readdir_fn;
-    finddir_fn_t finddir_fn;
+  read_fn_t read_fn;
+  write_fn_t write_fn;
+  open_fn_t open_fn;
+  close_fn_t close_fn;
+  readdir_fn_t readdir_fn;
+  finddir_fn_t finddir_fn;
 } fs_node_t;
 
 // A directory entry

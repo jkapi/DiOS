@@ -16,7 +16,13 @@ typedef struct {
     uint8_t checksum;
     uint32_t offset;   // Offset in the initrd that the file starts.
     uint32_t length;
+    uint32_t parent_dir_inode;
 } initrd_file_header_t;
+
+// One directory table
+typedef struct {
+    
+} directory_table_t;
 
 // Initialises the Initial Ramdisk from an address to the initrd multiboot
 // module. Returns a completed filesystem node.

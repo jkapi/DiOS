@@ -9,7 +9,8 @@
 initrd_file_header_t* file_headers; // The list of file headers.
 fs_node_t* initrd_root;             // Our root directory node.
 fs_node_t* initrd_dev;              // Director for /dev, so we can mount devfs
-fs_node_t* root_nodes;              // List of file nodes.
+fs_node_t* nodes;                   // List of file nodes.
+
 size_t num_files;                   // Number of file nodes.
 
 dirent_t dirent;
@@ -43,7 +44,7 @@ static dirent_t* initrd_readdir_fn(fs_node_t* node, uint32_t index) {
     return NULL;
   }
 
-  fs_node_t* result_node = &root_nodes[index - 1];
+  fs_node_t* result_node = &nodes[index - 1];
   memcpy(dirent.name, result_node->name, sizeof(result_node->name));
   dirent.inode_num = result_node->inode;
   return &dirent;
@@ -55,9 +56,9 @@ static fs_node_t* initrd_finddir_fn(fs_node_t* node, char* file_name) {
   }
 
   for (size_t i = 0; i < num_files; i++) {
-    if (memcmp(file_name, root_nodes[i].name,
-               sizeof(root_nodes[i].name)) == 0) {
-      return &root_nodes[i];
+    if (memcmp(file_name, nodes[i].name,
+               sizeof(nodes[i].name)) == 0) {
+      return &nodes[i];
     }
   }
 
@@ -88,8 +89,8 @@ fs_node_t* load_initrd(uint32_t initrd_module_addr) {
   initrd_dev->finddir_fn = &initrd_finddir_fn;
 
   // Initialize the file nodes.
-	root_nodes = kmalloc(sizeof(fs_node_t) * num_files);
-  memset(root_nodes, 0, sizeof(fs_node_t) * num_files);
+	nodes = kmalloc(sizeof(fs_node_t) * num_files);
+  memset(nodes, 0, sizeof(fs_node_t) * num_files);
 
   for (size_t i = 0; i < num_files; i++) {
     // Edit the file's offset to be relative to relative to the start
@@ -97,12 +98,12 @@ fs_node_t* load_initrd(uint32_t initrd_module_addr) {
     file_headers[i].offset += initrd_module_addr;
 
     // Create a new file node.
-    memcpy(root_nodes[i].name, &file_headers[i].file_name,
+    memcpy(nodes[i].name, &file_headers[i].file_name,
            sizeof(file_headers[i].file_name));
-    root_nodes[i].length = file_headers[i].length;
-    root_nodes[i].inode = i;
-    root_nodes[i].flags = FS_FILE;
-    root_nodes[i].read_fn = &initrd_read_fn;
+    nodes[i].length = file_headers[i].length;
+    nodes[i].inode = i;
+    nodes[i].flags = FS_FILE;
+    nodes[i].read_fn = &initrd_read_fn;
   }
   return initrd_root;
 }
@@ -110,5 +111,5 @@ fs_node_t* load_initrd(uint32_t initrd_module_addr) {
 void delete_initrd() {
   kfree(initrd_root);
   kfree(initrd_dev);
-  kfree(root_nodes);
+  kfree(nodes);
 }
