@@ -16,6 +16,7 @@
 // Every element added to the vector is copied into it.
 //
 // This means the following functions must exist for the value types stored:
+//   - new function: value_type* new_value_type();
 //   - copy function: void copy_value_type(value_type* key, value_type* output)
 //   - delete function: void delete_value_type(value_type* key)
 //
@@ -42,15 +43,15 @@
 typedef struct vector {
   uint32_t size;
   uint32_t capacity;
-  size_t data_size;
-  void* data;
+  void** data;
 } vector __attribute__((packed));
 
-vector* new_vector(size_t vector_size, size_t data_size);
+vector* new_vector(size_t vector_size);
 void delete_vector(vector* vector);
 void vector_resize(vector* vector);
 
 #define push(__vector, ...) __vector->push(__vector, __VA_ARGS__)
+#define emplace_back(__vector) __vector->emplace_back(__vector)
 #define get(__vector, ...) __vector->get(__vector, __VA_ARGS__)
 #define pop(__vector, ...) __vector->pop(__vector, __VA_ARGS__)
 #define delete(__vector) __vector->delete(__vector)
@@ -59,20 +60,31 @@ void vector_resize(vector* vector);
   typedef struct type##_vector {                                               \
     uint32_t size;                                                             \
     uint32_t capacity;                                                         \
-    size_t data_size;                                                          \
-    type* data;                                                                \
-    void (*delete) (struct type##_vector* vector);                             \
+    type** data;                                                               \
     void (*push) (struct type##_vector* vector, type value);                   \
+    type* (*emplace_back) (struct type##_vector* vector);                      \
     bool (*get) (struct type##_vector* vector, size_t index, type* output);    \
     bool (*pop) (struct type##_vector* vector, type* output);                  \
+    void (*delete) (struct type##_vector* vector);                             \
   } type##_vector __attribute__((packed));                                     \
                                                                                \
   static void push_##type##_vector(type##_vector* vect, type value) {          \
     if (vect->size == vect->capacity) {                                        \
       vector_resize((vector*) vect);                                           \
     }                                                                          \
-    copy_##type(&value, &vect->data[vect->size]);                              \
+    vect->data[vect->size] = kcalloc(sizeof(type));                            \
+    copy_##type(&value, vect->data[vect->size]);                               \
     vect->size++;                                                              \
+  }                                                                            \
+                                                                               \
+  static type* emplace_back_##type##_vector(type##_vector* vect) {             \
+    if (vect->size == vect->capacity) {                                        \
+      vector_resize((vector*) vect);                                           \
+    }                                                                          \
+    type* emplaced = new_##type();                                             \
+    vect->data[vect->size] = emplaced;                                         \
+    vect->size++;                                                              \
+    return emplaced;                                                           \
   }                                                                            \
                                                                                \
   static bool get_##type##_vector(type##_vector* vect, size_t index,           \
@@ -81,7 +93,7 @@ void vector_resize(vector* vector);
       return false;                                                            \
     }                                                                          \
                                                                                \
-    *output = vect->data[index];                                               \
+    *output = *vect->data[index];                                              \
     return true;                                                               \
   }                                                                            \
                                                                                \
@@ -90,21 +102,22 @@ void vector_resize(vector* vector);
       return false;                                                            \
     }                                                                          \
     vect->size--;                                                              \
-    *output = vect->data[vect->size];                                          \
+    *output = *vect->data[vect->size];                                         \
+    delete_##type(vect->data[vect->size]);                                     \
     return true;                                                               \
   }                                                                            \
                                                                                \
   static void delete_##type##_vector(type##_vector* vect) {                    \
     for (size_t i; i < vect->size; i++) {                                      \
-      delete_##type(&vect->data[i]);                                           \
+      delete_##type(vect->data[i]);                                            \
     }                                                                          \
     delete_vector((vector*) vect);                                             \
   }                                                                            \
                                                                                \
   static type##_vector* new_##type##_vector() {                                \
-    type##_vector* vector = new_vector(                                        \
-      sizeof(type##_vector), sizeof(type));                                    \
+    type##_vector* vector = new_vector(sizeof(type##_vector));                 \
     vector->push = push_##type##_vector;                                       \
+    vector->emplace_back = emplace_back_##type##_vector;                       \
     vector->get = get_##type##_vector;                                         \
     vector->pop = pop_##type##_vector;                                         \
     vector->delete = delete_##type##_vector;                                   \
@@ -115,5 +128,6 @@ GENERATE_VECTOR(int);
 GENERATE_VECTOR(char);
 GENERATE_VECTOR(double);
 GENERATE_VECTOR(char_ptr);
+GENERATE_VECTOR(string);
 
 #endif  // _VECTOR_H_

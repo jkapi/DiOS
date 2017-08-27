@@ -58,11 +58,10 @@
 typedef struct hashmap {
   uint32_t size;
   uint32_t capacity;
-  size_t entry_size;
   void** buckets;
 } hashmap __attribute__((packed));
 
-hashmap* new_hashmap(size_t hashmap_size, size_t entry_size);
+hashmap* new_hashmap(size_t hashmap_size);
 void hashmap_resize(hashmap* hashmap);
 
 #define add(__hashmap, ...) __hashmap->add(__hashmap, __VA_ARGS__)
@@ -72,21 +71,31 @@ void hashmap_resize(hashmap* hashmap);
 #define GENERATE_HASHMAP(key_type, value_type)                                 \
   /* A single entry in the Hashmap and its copy/delete functions */            \
   typedef struct key_type##_to_##value_type##_entry {                          \
-    key_type key;                                                              \
-    value_type value;                                                          \
+    key_type* key;                                                             \
+    value_type* value;                                                         \
   } key_type##_to_##value_type##_entry __attribute__((packed));                \
+                                                                               \
+  static key_type##_to_##value_type##_entry*                                   \
+      new_##key_type##_to_##value_type##_entry() {                             \
+    key_type##_to_##value_type##_entry* new_entry = kcalloc(                   \
+      sizeof(key_type##_to_##value_type##_entry));                             \
+    new_entry->key = kcalloc(sizeof(key_type));                                \
+    new_entry->value = kcalloc(sizeof(value_type));                            \
+    return new_entry;                                                          \
+  }                                                                            \
                                                                                \
   static void copy_##key_type##_to_##value_type##_entry(                       \
         key_type##_to_##value_type##_entry* to_copy,                           \
         key_type##_to_##value_type##_entry* output) {                          \
-    copy_##key_type(&to_copy->key, &output->key);                              \
-    copy_##value_type(&to_copy->value, &output->value);                        \
+    copy_##key_type(to_copy->key, output->key);                                \
+    copy_##value_type(to_copy->value, output->value);                          \
   }                                                                            \
                                                                                \
   static void delete_##key_type##_to_##value_type##_entry(                     \
       key_type##_to_##value_type##_entry* to_delete) {                         \
     delete_##key_type(to_delete->key);                                         \
-    delete_##value_type(to_delete->value);                                     \  
+    delete_##value_type(to_delete->value);                                     \
+    kfree(to_delete);                                                          \
   };                                                                           \
                                                                                \
   /* Each bucket in the hashmap will be a vector of entries */                 \
@@ -95,7 +104,6 @@ void hashmap_resize(hashmap* hashmap);
   typedef struct key_type##_to_##value_type##_hashmap {                        \
     uint32_t size;                                                             \
     uint32_t capacity;                                                         \
-    size_t entry_size;                                                         \
     key_type##_to_##value_type##_entry_vector** buckets;                       \
     void (*add) (struct key_type##_to_##value_type##_hashmap* hashmap,         \
     	           key_type key, value_type value);                              \
@@ -118,13 +126,13 @@ void hashmap_resize(hashmap* hashmap);
       hashmap->buckets[bucket] =                                               \
         new_##key_type##_to_##value_type##_entry_vector();                     \
     }                                                                          \
+    /* TODO(psamora) we currently don't check for duplicates :S */             \
                                                                                \
     /* Creates a local entry and then push it in the bucket vector */          \
-    /* TODO(psamora) Implement emplace_back on vector */                       \
-    key_type##_to_##value_type##_entry entry;                                  \
-    copy_##key_type(&key, &entry.key);                                         \
-    copy_##value_type(&value, &entry.value);                                   \
-    push(hashmap->buckets[bucket], entry);                                     \
+    key_type##_to_##value_type##_entry* entry =                                \
+        emplace_back(hashmap->buckets[bucket]);                                \
+    copy_##key_type(&key, entry->key);                                         \
+    copy_##value_type(&value, entry->value);                                   \
     hashmap->size++;                                                           \
   }                                                                            \
                                                                                \
@@ -145,8 +153,9 @@ void hashmap_resize(hashmap* hashmap);
       if (!get(bucket, i, &entry)) {                                           \
         continue;                                                              \
       }                                                                        \
-      if (key_type##_equals(*key, entry.key)) {                                \
-        *output = entry.value;                                                 \
+                                                                              \
+      if (key_type##_equals(key, entry.key)) {                                 \
+        *output = *entry.value;                                                \
         return true;                                                           \
       }                                                                        \
     }                                                                          \
@@ -168,8 +177,7 @@ void hashmap_resize(hashmap* hashmap);
   static key_type##_to_##value_type##_hashmap*                                 \
       new_##key_type##_to_##value_type##_hashmap() {                           \
     key_type##_to_##value_type##_hashmap* hashmap = new_hashmap(               \
-      sizeof(key_type##_to_##value_type##_hashmap),                            \
-      sizeof(key_type##_to_##value_type##_entry));                             \
+      sizeof(key_type##_to_##value_type##_hashmap));                           \
     hashmap->add = add_##key_type##_to_##value_type##_hashmap;                 \
     hashmap->get = get_##key_type##_to_##value_type##_hashmap;                 \
     hashmap->delete = delete_##key_type##_to_##value_type##_hashmap;           \
@@ -177,7 +185,8 @@ void hashmap_resize(hashmap* hashmap);
   }                                                                            \
 
 GENERATE_HASHMAP(int, int);
-// GENERATE_HASHMAP(string, int);
+GENERATE_HASHMAP(string, int);
+GENERATE_HASHMAP(string, string);
 
 // #define remove(__hashmap, __key) __hashmap->remove(__hashmap, __key)
 // type (*remove) (struct key_type##_to_##value_type##_hashmap* hashmap,

@@ -1,16 +1,16 @@
 #include <libk/vector.h>
+#include <stdio.h>
 #include <string.h>
 
-vector* new_vector(size_t vector_size, size_t data_size) {
-  vector* vector = kmalloc(vector_size);
+vector* new_vector(size_t vector_size) {
+  vector* vector = kcalloc(vector_size);
   if (vector == NULL) {
     return NULL;
   }
 
   vector->size = 0;
   vector->capacity = DEFAULT_CAPACITY;
-  vector->data_size = data_size;
-  vector->data = kmalloc(data_size * DEFAULT_CAPACITY);
+  vector->data = kcalloc(sizeof(void*) * DEFAULT_CAPACITY);
   if (vector->data == NULL) {
     kfree(vector);
     return NULL;
@@ -27,13 +27,15 @@ void delete_vector(vector* vector) {
 void vector_resize(vector* vector) {
   // TODO(psamora) When kheap become better, realloc would be awesome
   uint32_t new_capacity = vector->capacity * 2;
-  uint32_t memory_size = vector->data_size * new_capacity;
-  void* new_data = kmalloc(memory_size);
+
+  void** new_data = kcalloc(sizeof(void*) * new_capacity);
   if (new_data == NULL) {
     // error;
   }
 
-  memcpy(new_data, vector->data, memory_size);
+  for (size_t i = 0; i < vector->size; i++) {
+    new_data[i] = vector->data[i];
+  }
 
   kfree(vector->data);
   vector->capacity = new_capacity;

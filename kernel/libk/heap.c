@@ -102,12 +102,14 @@ void* kcalloc(size_t bytes) {
 
 void kfree(void* ptr) {
   if (!ptr) {
+    printf("NOT ALLOCATED 1\n");
     return;
   }
   heap_page_t* heap_page = get_heap_block_metadata(ptr);
 
   // Checks if we are actually freeing a malloced heap block
   if (heap_page->checksum != MALLOCED_CHECKSUM) {
+    printf("NOT ALLOCATED 2\n");
     // abort
     return;
   }
@@ -117,6 +119,7 @@ void kfree(void* ptr) {
 
   // Checks if this relative pointer is actually aligned to a block start
   if (!is_aligned(relative_addr)) {
+    printf("NOT ALLOCATED 3\n");
     // abort
     return;
   }
@@ -127,6 +130,7 @@ void kfree(void* ptr) {
   // Check in the first_alloced_bitmap if this is the start of the allocation 
   if (map_check(heap_page->first_alloced_bitmap, block_num) == false) {
     // abort
+    printf("NOT ALLOCATED 4\n");
     return;
   }
 

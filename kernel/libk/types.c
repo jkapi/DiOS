@@ -5,18 +5,24 @@
 #include <stdio.h>
 #include <string.h>
 
-string* new_string(char* contents, size_t size) {
+string* new_string() {
+  string* string = kcalloc(sizeof(string));
+  string->contents = kcalloc(sizeof(char) * 1);
+  return string;
+}
+
+string* new_string_2(char* contents, size_t size) {
   string* string = kcalloc(sizeof(string));
   string->size = size;
-  string->contents = kcalloc(sizeof(char) * size);
-  memcpy(&string->contents, contents, size);
+  string->contents = kcalloc(sizeof(char) * (size + 1));
+  memcpy(string->contents, contents, size);
   return string;
 }
 
 void copy_string(string* to_copy, string* output) {
   output->size = to_copy->size;
-  output->contents = kcalloc(sizeof(char) * to_copy->size);
-  memcpy(&output->contents, to_copy->contents, to_copy->size);
+  output->contents = kcalloc(sizeof(char) * (to_copy->size + 1));
+  memcpy(output->contents, to_copy->contents, to_copy->size);
 }
 
 void delete_string(string* str) {
@@ -33,7 +39,6 @@ uint32_t string_hash(string* str) {
     hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
   }   
 
-  printf("CRAZY HASH %lu\n", hash);
   return hash;
 }
 

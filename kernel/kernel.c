@@ -33,15 +33,15 @@ void kernel_early(struct multiboot_info* mb) {
   test_vector();
   test_hashmap();
 
-  timer_install();
-  keyboard_install();
+  // timer_install();
+  // keyboard_install();
   enable_interrupts();
 }
 
 void kernel_main(void) {
-  printf("Hello, kernel World %lu!\n", HEAP_PAGE_ACTUAL_SIZE);
-  int a = 10;
-  printf("aia %lx\n", virt_to_phys((virtual_addr)&a));
+  // printf("Hello, kernel World %lu!\n", HEAP_PAGE_ACTUAL_SIZE);
+  // int a = 10;
+  // printf("aia %lx\n", virt_to_phys((virtual_addr)&a));
   for (;;) {
     asm("hlt");
   }
