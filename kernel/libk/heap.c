@@ -112,7 +112,8 @@ void kfree(void* ptr) {
     return;
   }
 
-  void* relative_addr = (void*) ptr - (void*) heap_page->alloc_memory;
+  void* relative_addr = (void*) (uint32_t) ptr
+                                - (uint32_t) heap_page->alloc_memory;
 
   // Checks if this relative pointer is actually aligned to a block start
   if (!is_aligned(relative_addr)) {

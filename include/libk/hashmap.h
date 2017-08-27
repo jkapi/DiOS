@@ -74,13 +74,11 @@ void hashmap_resize(hashmap* hashmap);
     value_type value;                                                          \
   } key_type##_to_##value_type##_entry __attribute__((packed));                \
                                                                                \
-  static key_type##_to_##value_type##_entry                                    \
-      copy_##key_type##_to_##value_type##_entry(                               \
-        key_type##_to_##value_type##_entry to_copy) {                          \
-    key_type##_to_##value_type##_entry copied;                                 \
-    copied.key = copy_##key_type(to_copy.key);                                 \
-    copied.value = copy_##value_type(to_copy.value);                           \
-    return copied;                                                             \ 
+  static void copy_##key_type##_to_##value_type##_entry(                       \
+        key_type##_to_##value_type##_entry to_copy,                            \
+        key_type##_to_##value_type##_entry* output) {                          \
+    copy_##key_type(to_copy.key, &output->key);                                \
+    copy_##value_type(to_copy.value, &output->value);                          \
   }                                                                            \
                                                                                \
   static void delete_##key_type##_to_##value_type##_entry(                     \
@@ -122,8 +120,8 @@ void hashmap_resize(hashmap* hashmap);
     /* Creates a local entry and then push it in the bucket vector */          \
     /* TODO(psamora) Implement emplace_back on vector */                       \
     key_type##_to_##value_type##_entry entry;                                  \
-    entry.key = key;                                                           \
-    entry.value = value;                                                       \
+    copy_##key_type(key, &entry.key);                                          \
+    copy_##value_type(value, &entry.value);                                    \
     push(hashmap->buckets[bucket], entry);                                     \
     hashmap->size++;                                                           \
   }                                                                            \

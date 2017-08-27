@@ -70,7 +70,7 @@ void vector_resize(vector* vector);
     if (vect->size == vect->capacity) {                                        \
       vector_resize((vector*) vect);                                           \
     }                                                                          \
-    vect->data[vect->size] = copy_##type(value);                               \
+    copy_##type(value, &vect->data[vect->size]);                               \
     vect->size++;                                                              \
   }                                                                            \
                                                                                \
