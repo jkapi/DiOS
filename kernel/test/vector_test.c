@@ -10,9 +10,9 @@ TEST(IntVectorBasicUsage) {
   int output;
   bool popped = pop(vector, &output);
   EXPECT_TRUE(popped);
-  EXPECT_EQ(output, 1);
+  EXPECT_EQ(1, output);
 
-  delete (vector);
+  delete(vector);
 }
 
 TEST(CharPtrVectorBasicUsage) {
@@ -23,29 +23,29 @@ TEST(CharPtrVectorBasicUsage) {
   char* output;
   bool popped = pop(ptr_vector, &output);
   EXPECT_TRUE(popped);
-  EXPECT_EQ(output, &c);
+  EXPECT_EQ(&c, output);
 
-  delete (ptr_vector);
+  delete(ptr_vector);
 }
 
 TEST(VectorExpandsCorrectly) {
   char_vector* vector = new_char_vector();
-  EXPECT_EQ(vector->size, 0);
-  EXPECT_EQ(vector->capacity, 1);
+  EXPECT_EQ(0, vector->size);
+  EXPECT_EQ(1, vector->capacity);
 
   push(vector, 'a');
-  EXPECT_EQ(vector->size, 1);
-  EXPECT_EQ(vector->capacity, 1);
+  EXPECT_EQ(1, vector->size);
+  EXPECT_EQ(1, vector->capacity);
 
   push(vector, 'b');
   push(vector, 'c');
-  EXPECT_EQ(vector->size, 3);
-  EXPECT_EQ(vector->capacity, 4);
+  EXPECT_EQ(3, vector->size);
+  EXPECT_EQ(4, vector->capacity);
 
   push(vector, 'd');
   push(vector, 'e');
-  EXPECT_EQ(vector->size, 5);
-  EXPECT_EQ(vector->capacity, 8);
+  EXPECT_EQ(5, vector->size);
+  EXPECT_EQ(8, vector->capacity);
 
   for (int i = 4; i >= 0; i--) {
     char output;
@@ -54,7 +54,7 @@ TEST(VectorExpandsCorrectly) {
     EXPECT_EQ('a' + i, output);
   }
 
-  delete (vector);
+  delete(vector);
 }
 
 TEST(PopEmptyVectorFails) {
@@ -62,9 +62,9 @@ TEST(PopEmptyVectorFails) {
   int output = 12345;
   bool popped = pop(vector, &output);
   EXPECT_FALSE(popped);
-  EXPECT_EQ(output, 12345);
+  EXPECT_EQ(12345, output);
 
-  delete (vector);
+  delete(vector);
 }
 
 TEST(VectorGet) {
@@ -75,13 +75,13 @@ TEST(VectorGet) {
   int output;
   bool found = get(vector, 0, &output);
   EXPECT_TRUE(found);
-  EXPECT_EQ(output, 1);
+  EXPECT_EQ(1, output);
 
   found = get(vector, 1, &output);
   EXPECT_TRUE(found);
-  EXPECT_EQ(output, 2);
+  EXPECT_EQ(2, output);
 
-  delete (vector);
+  delete(vector);
 }
 
 
@@ -96,8 +96,8 @@ TEST(VectorGetOutOfBoundsFail) {
 
   found = get(vector, 1, &output);
   EXPECT_FALSE(found);
-  EXPECT_EQ(output, 12345);
-  delete (vector);
+  EXPECT_EQ(12345, output);
+  delete(vector);
 }
 
 

@@ -92,6 +92,14 @@ void* kmalloc(size_t bytes) {
   return &free_heap_page->alloc_memory[first_fitting_block * HEAP_BLOCK_SIZE];
 }
 
+void* kcalloc(size_t bytes) {
+  void* ptr = kmalloc(bytes);
+  if (ptr != NULL) {
+    memset(ptr, 0x0, bytes);
+  }
+  return ptr;
+}
+
 void kfree(void* ptr) {
   if (!ptr) {
     return;

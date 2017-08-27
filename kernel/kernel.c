@@ -13,6 +13,7 @@
 #include <libk/heap.h>
 #include <libk/phys_mem.h>
 #include <libk/virt_mem.h>
+#include <test/hashmap_test.h>
 #include <test/heap_test.h>
 #include <test/macros_test.h>
 #include <test/phys_mem_test.h>
@@ -30,6 +31,7 @@ void kernel_early(struct multiboot_info* mb) {
   test_phys_mem();
   test_heap();
   test_vector();
+  test_hashmap();
 
   timer_install();
   keyboard_install();

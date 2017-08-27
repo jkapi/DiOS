@@ -35,6 +35,7 @@ heap_page_list_t heap_page_list_;
 virtual_addr cur_heap_addr_;
 
 void* kmalloc(size_t size);
+void* kcalloc(size_t size);
 void kfree(void* ptr);
 
 void kernel_heap_init();
