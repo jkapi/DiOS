@@ -33,8 +33,8 @@ void kernel_early(struct multiboot_info* mb) {
   test_vector();
   test_hashmap();
 
-  // timer_install();
-  // keyboard_install();
+  timer_install();
+  keyboard_install();
   enable_interrupts();
 }
 
